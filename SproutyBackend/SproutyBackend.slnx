@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="../src/Sprouty.Api/Sprouty.Api.csproj" Id="c217fb23-9468-49ee-a3a8-f8d73b153370" />
-  <Project Path="../src/Sprouty.Application/Sprouty.Application.csproj" Id="49a29c43-34b9-4cf5-a340-54422d831ebf" />
-  <Project Path="../src/Sprouty.Domain/Sprouty.Domain.csproj" Id="fc9e7882-6fe8-43a6-ac69-b58201f187ca" />
-  <Project Path="../src/Sprouty.Infrastructure/Sprouty.Infrastructure.csproj" Id="ddec7003-8eb4-420b-9a90-08462a17736f" />
+  <Project Path="src/Sprouty.Api/Sprouty.Api.csproj" Id="c217fb23-9468-49ee-a3a8-f8d73b153370" />
+  <Project Path="src/Sprouty.Application/Sprouty.Application.csproj" Id="49a29c43-34b9-4cf5-a340-54422d831ebf" />
+  <Project Path="src/Sprouty.Domain/Sprouty.Domain.csproj" Id="fc9e7882-6fe8-43a6-ac69-b58201f187ca" />
+  <Project Path="src/Sprouty.Infrastructure/Sprouty.Infrastructure.csproj" Id="ddec7003-8eb4-420b-9a90-08462a17736f" />
 </Solution>
