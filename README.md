@@ -72,14 +72,18 @@ Infrastructure (EF Core + SQL Server)
 ```text
 sprouty/
 │
+├── Docs/
+│   ├── Product-Definition.pdf
+│   ├── ERD.pdf
+│   └── Workflow.pdf
+│
 ├── SproutyBackend/
 │   ├── SproutyBackend.slnx
-│   ├── src/
-│   │   ├── Sprouty.Api/
-│   │   ├── Sprouty.Application/
-│   │   ├── Sprouty.Domain/
-│   │   └── Sprouty.Infrastructure/
-│   └── README.md
+│   └── src/
+│       ├── Sprouty.Api/
+│       ├── Sprouty.Application/
+│       ├── Sprouty.Domain/
+│       └── Sprouty.Infrastructure/
 │
 ├── SproutyFrontend/
 │   ├── src/
@@ -88,6 +92,12 @@ sprouty/
 │   └── README.md
 │
 └── README.md
+```
+
+- **Docs** – Project documentation, including the Product Definition, ERD, and Workflow.
+- **SproutyBackend** – ASP.NET Core Web API solution following Clean Architecture.
+- **SproutyFrontend** – Angular 20 client application.
+- **README.md** – Main project overview and setup guide.
 ```
 
 Each project contains its own dedicated README with setup instructions.
@@ -196,9 +206,10 @@ API_URL = "https://localhost:<PORT>/api";
 ---
 ## 📖 Documentation
 
-- 📄 [Product Definition](docs/Product-Definition.pdf)
-- 💻 Backend Documentation (`SproutyBackend/README.md`)
-- 🎨 Frontend Documentation (`SproutyFrontend/README.md`)
+Project documentation is available in the `Docs/` directory:
+
+- Product Definition
+Additional documentation may be added as the project evolves.
 
 ---
 
