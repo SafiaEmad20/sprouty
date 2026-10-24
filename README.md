@@ -194,10 +194,11 @@ API_URL = "https://localhost:<PORT>/api";
 ```
 
 ---
+## 📖 Documentation
 
-# 📚 Documentation
-
-Detailed project documentation—including system design, Entity Relationship Diagram (ERD), workflow diagrams, proposal, and project analysis—is provided separately in the accompanying project documentation (PDF).
+- 📄 [Product Definition](docs/Product-Definition.pdf)
+- 💻 Backend Documentation (`SproutyBackend/README.md`)
+- 🎨 Frontend Documentation (`SproutyFrontend/README.md`)
 
 ---
 
