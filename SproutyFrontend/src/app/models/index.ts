@@ -1,6 +1,8 @@
 // Models mirror the ERD (camelCase, as ASP.NET Core serializes JSON by default).
-export interface User { id: string; name: string; email: string; }
-export interface AuthResponse { token: string; user: User; }
+export interface User { id: string; name: string; email: string; role?: string; }
+export interface AuthResponse { token: string; user: User; expiresAt?: string; }
+/** Exact shape returned by POST /api/auth/login and /register */
+export interface ApiAuthResponse { userId: string; name: string; email: string; role: string; token: string; expiresAt: string; }
 
 export interface PlantType {
   id: string; nameAr: string; nameEn: string; category: string; imageUrl: string;

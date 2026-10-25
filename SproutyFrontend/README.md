@@ -3,10 +3,11 @@
 ## Run
     npm install
     ng serve        # http://localhost:4200
-Any email + a 6+ character password logs you in (mock mode).
+Login/Register talk to the REAL backend (password min 8 characters). Start the backend first (https://localhost:7092), or set `USE_MOCK_AUTH = true` in `src/app/core/config.ts` to log in without it.
 
 ## Mock vs real API
-`src/app/core/config.ts` -> `USE_MOCK = true`. Set it to `false` and set `API_URL` when the backend is ready.
+`src/app/core/config.ts`: `USE_MOCK_AUTH = false` (auth is live). `USE_MOCK = true` keeps plants/readings/notifications on mock data until those endpoints exist.
+Development uses `proxy.conf.json` (`/api` -> https://localhost:7092), so CORS is not needed locally. Production needs CORS on the backend.
 Only the services in `src/app/services` and `core/auth.service.ts` talk to the API/mock.
 Mock data lives in `src/app/mock/mock-data.ts`.
 

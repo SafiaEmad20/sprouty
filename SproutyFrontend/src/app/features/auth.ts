@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
+import { apiErrorMessage } from '../core/api-error';
 
 @Component({
   selector: 'app-auth',
@@ -25,7 +26,7 @@ import { AuthService } from '../core/auth.service';
           <input id="password" [type]="show() ? 'text' : 'password'" formControlName="password" autocomplete="current-password">
           <button type="button" class="eye" (click)="show.set(!show())" [attr.aria-label]="show() ? 'Hide password' : 'Show password'" [attr.aria-pressed]="show()">{{ show() ? 'Hide' : 'Show' }}</button>
         </div>
-        @if (touched('password')) { <p class="error">Password must be at least 6 characters.</p> }
+        @if (touched('password')) { <p class="error">Password must be at least 8 characters.</p> }
         @if (failed()) { <p class="error">{{ failed() }}</p> }
         <p><button class="btn" [disabled]="loading()">{{ isRegister ? 'Create account' : 'Log in' }}</button></p>
       </form>
@@ -42,7 +43,7 @@ export class AuthPage {
   isRegister = inject(ActivatedRoute).snapshot.data['mode'] === 'register';
   show = signal(false); loading = signal(false); failed = signal('');
   form = this.fb.nonNullable.group({
-    name: [''], email: ['', [Validators.required, Validators.email]], password: ['', [Validators.required, Validators.minLength(6)]],
+    name: [''], email: ['', [Validators.required, Validators.email]], password: ['', [Validators.required, Validators.minLength(8)]],
   });
   constructor() { if (this.isRegister) this.form.controls.name.addValidators([Validators.required, Validators.minLength(2)]); }
   touched(c: 'name' | 'email' | 'password') { const x = this.form.controls[c]; return x.invalid && (x.dirty || x.touched); }
@@ -55,7 +56,7 @@ export class AuthPage {
     const req$ = this.isRegister ? this.auth.register(name, email, password) : this.auth.login(email, password);
     req$.subscribe({
       next: () => this.router.navigate(['/my-plants']),
-      error: () => { this.loading.set(false); this.failed.set('Could not sign you in. Check your details and try again.'); },
+      error: e => { this.loading.set(false); this.failed.set(apiErrorMessage(e, 'Could not sign you in. Check your details and try again.')); },
     });
   }
 }
