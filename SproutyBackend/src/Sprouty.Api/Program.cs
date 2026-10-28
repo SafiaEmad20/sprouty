@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Win32;
 using Sprouty.Api.Middleware;
 using Sprouty.Api.OpenApi;
 using Sprouty.Application.Interfaces;
 using Sprouty.Application.Services;
+using Sprouty.Domain.Entities;
 using Sprouty.Infrastructure;
 using Sprouty.Infrastructure.Persistence;
 using System.Text;
@@ -36,6 +38,10 @@ namespace Sprouty.Api
             // Register Application and Infrastructure services
             builder.Services.AddInfrastructure();
             builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+            // Register Plant Type service for Dependency Injection.
+            builder.Services.AddScoped<IPlantTypeService, PlantTypeService>();
 
 
 

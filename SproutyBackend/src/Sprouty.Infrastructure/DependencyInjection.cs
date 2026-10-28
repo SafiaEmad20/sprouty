@@ -12,6 +12,7 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPlantTypeRepository, PlantTypeRepository>();
         services.AddScoped<IPasswordHasherService, PasswordHasherService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 
