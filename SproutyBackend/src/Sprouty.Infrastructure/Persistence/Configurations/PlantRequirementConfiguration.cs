@@ -32,7 +32,7 @@ namespace Sprouty.Infrastructure.Persistence.Configurations
 
             b.HasIndex(x => x.PlantTypeId).IsUnique();
 
-           
+            // TEMPORARY light ranges (relative 0-100 scale). Need real calibration.
             b.HasData(
                 new PlantRequirement
                 {
@@ -44,8 +44,8 @@ namespace Sprouty.Infrastructure.Persistence.Configurations
                     MaxTemperature = 30,
                     MinHumidity = 40,
                     MaxHumidity = 70,
-                    MinLight = 5000,
-                    MaxLight = 20000
+                    MinLight = 40,
+                    MaxLight = 90
                 },
                 new PlantRequirement
                 {
@@ -57,8 +57,8 @@ namespace Sprouty.Infrastructure.Persistence.Configurations
                     MaxTemperature = 27,
                     MinHumidity = 40,
                     MaxHumidity = 70,
-                    MinLight = 3000,
-                    MaxLight = 15000
+                    MinLight = 30,
+                    MaxLight = 80
                 },
                 new PlantRequirement
                 {
@@ -70,8 +70,8 @@ namespace Sprouty.Infrastructure.Persistence.Configurations
                     MaxTemperature = 28,
                     MinHumidity = 40,
                     MaxHumidity = 60,
-                    MinLight = 10000,
-                    MaxLight = 30000
+                    MinLight = 50,
+                    MaxLight = 100
                 },
                 new PlantRequirement
                 {
@@ -83,8 +83,8 @@ namespace Sprouty.Infrastructure.Persistence.Configurations
                     MaxTemperature = 30,
                     MinHumidity = 30,
                     MaxHumidity = 70,
-                    MinLight = 2000,
-                    MaxLight = 20000
+                    MinLight = 20,
+                    MaxLight = 80
                 });
         }
     }
