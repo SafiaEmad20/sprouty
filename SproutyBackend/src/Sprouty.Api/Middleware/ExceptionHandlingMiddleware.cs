@@ -29,6 +29,34 @@ namespace Sprouty.Api.Middleware
                     StatusCodes.Status409Conflict,
                     ex.Message);
             }
+
+
+            catch (SensorOfflineException ex)
+            {
+                await WriteResponse(
+                    context,
+                    StatusCodes.Status409Conflict,
+                    ex.Message);
+            }
+
+
+            catch (NotFoundException ex)
+            {
+                await WriteResponse(
+                    context,
+                    StatusCodes.Status404NotFound,
+                    ex.Message);
+            }
+
+            catch (ValidationException ex)
+            {
+                await WriteResponse(
+                    context,
+                    StatusCodes.Status400BadRequest,
+                    ex.Message);
+            }
+
+
             catch (UnauthorizedAccessException)
             {
                 await WriteResponse(
@@ -65,13 +93,18 @@ namespace Sprouty.Api.Middleware
             await context.Response.WriteAsJsonAsync(new ProblemDetails
             {
                 Status = statusCode,
+
                 Title = statusCode switch
                 {
+                    StatusCodes.Status400BadRequest => "Bad Request",
                     StatusCodes.Status409Conflict => "Conflict",
+                    StatusCodes.Status404NotFound => "Not Found",
                     StatusCodes.Status401Unauthorized => "Unauthorized",
                     _ => "Server Error"
                 },
+
                 Detail = message
+
             });
         }
     }

@@ -12,6 +12,8 @@ public enum PlantStatus
     OverWatered = 3,
     TooHot = 4,
     TooCold = 5,
-    NeedsLight = 6
+    NeedsLight = 6,
+    AirTooDry = 7,
+    AirTooHumid = 8
 }
 

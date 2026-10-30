@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddScoped<IPlantTypeRepository, PlantTypeRepository>();
         services.AddScoped<IPasswordHasherService, PasswordHasherService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<ISensorProcessingRepository,SensorProcessingRepository>();
 
         return services;
     }

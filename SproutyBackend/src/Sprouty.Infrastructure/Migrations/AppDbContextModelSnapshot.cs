@@ -143,11 +143,11 @@ namespace Sprouty.Infrastructure.Migrations
                         {
                             Id = new Guid("b1000000-0000-0000-0000-000000000001"),
                             MaxHumidity = 70f,
-                            MaxLight = 20000f,
+                            MaxLight = 90f,
                             MaxMoisture = 70f,
                             MaxTemperature = 30f,
                             MinHumidity = 40f,
-                            MinLight = 5000f,
+                            MinLight = 40f,
                             MinMoisture = 40f,
                             MinTemperature = 18f,
                             PlantTypeId = new Guid("a1000000-0000-0000-0000-000000000001")
@@ -156,11 +156,11 @@ namespace Sprouty.Infrastructure.Migrations
                         {
                             Id = new Guid("b1000000-0000-0000-0000-000000000002"),
                             MaxHumidity = 70f,
-                            MaxLight = 15000f,
+                            MaxLight = 80f,
                             MaxMoisture = 80f,
                             MaxTemperature = 27f,
                             MinHumidity = 40f,
-                            MinLight = 3000f,
+                            MinLight = 30f,
                             MinMoisture = 50f,
                             MinTemperature = 15f,
                             PlantTypeId = new Guid("a1000000-0000-0000-0000-000000000002")
@@ -169,11 +169,11 @@ namespace Sprouty.Infrastructure.Migrations
                         {
                             Id = new Guid("b1000000-0000-0000-0000-000000000003"),
                             MaxHumidity = 60f,
-                            MaxLight = 30000f,
+                            MaxLight = 100f,
                             MaxMoisture = 70f,
                             MaxTemperature = 28f,
                             MinHumidity = 40f,
-                            MinLight = 10000f,
+                            MinLight = 50f,
                             MinMoisture = 40f,
                             MinTemperature = 15f,
                             PlantTypeId = new Guid("a1000000-0000-0000-0000-000000000003")
@@ -182,11 +182,11 @@ namespace Sprouty.Infrastructure.Migrations
                         {
                             Id = new Guid("b1000000-0000-0000-0000-000000000004"),
                             MaxHumidity = 70f,
-                            MaxLight = 20000f,
+                            MaxLight = 80f,
                             MaxMoisture = 70f,
                             MaxTemperature = 30f,
                             MinHumidity = 30f,
-                            MinLight = 2000f,
+                            MinLight = 20f,
                             MinMoisture = 30f,
                             MinTemperature = 15f,
                             PlantTypeId = new Guid("a1000000-0000-0000-0000-000000000004")
