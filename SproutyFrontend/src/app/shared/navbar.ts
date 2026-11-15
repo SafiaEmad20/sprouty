@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { NotificationsService } from '../services/notifications.service';
@@ -47,6 +47,6 @@ import { NotificationsService } from '../services/notifications.service';
 })
 export class Navbar {
   auth = inject(AuthService); notes = inject(NotificationsService); private router = inject(Router);
-  constructor() { if (this.auth.isLoggedIn) this.notes.load(); }
+  constructor() { effect(() => { if (this.auth.user()) this.notes.load(); else this.notes.items.set([]); }); }
   logout() { this.auth.logout(); this.router.navigate(['/login']); }
 }

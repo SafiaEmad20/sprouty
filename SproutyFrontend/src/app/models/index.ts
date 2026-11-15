@@ -19,10 +19,17 @@ export interface PlantRequirement {
 export interface Plant { id: string; userId: string; plantTypeId: string; nickname: string; imageUrl: string; addedAt: string; }
 export interface SensorReading { id: string; sensorId: string; moisture: number; temperature: number; light: number; recordedAt: string; }
 
-export type StatusType = 'Healthy' | 'NeedsWater' | 'TooMuchWater' | 'TooHot' | 'TooCold' | 'NeedsLight' | 'TooMuchLight';
+export type StatusType = 'Healthy' | 'NeedsWater' | 'TooMuchWater' | 'TooHot' | 'TooCold' | 'NeedsLight' | 'TooMuchLight' | 'NoData' | 'AirTooDry' | 'AirTooHumid';
 export interface PlantStatus { id: string; plantId: string; statusType: StatusType; message: string; computedAt: string; }
 
 export interface AppNotification { id: string; plantId: string; title: string; message: string; type: StatusType; isRead: boolean; createdAt: string; }
 
 export interface LatestReading { reading: SensorReading; status: PlantStatus; requirement: PlantRequirement; }
 export interface NewReadingDto { plantId: string; moisture: number; temperature: number; light: number; }
+
+/** Exact shape of GET /api/plant-types and /api/plant-types/{id} (ASP.NET camelCase). */
+export interface ApiRequirement {
+  minMoisture: number; maxMoisture: number; minTemperature: number; maxTemperature: number;
+  minHumidity: number; maxHumidity: number; minLight: number; maxLight: number;
+}
+export interface ApiPlantType { id: string; nameAr: string; nameEn: string; category: string; imageUrl?: string | null; requirement?: ApiRequirement | null; }

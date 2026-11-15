@@ -55,7 +55,7 @@ export class AuthPage {
     this.loading.set(true); this.failed.set('');
     const req$ = this.isRegister ? this.auth.register(name, email, password) : this.auth.login(email, password);
     req$.subscribe({
-      next: () => this.router.navigate(['/my-plants']),
+            next: () => this.router.navigate(['/']),
       error: e => { this.loading.set(false); this.failed.set(apiErrorMessage(e, 'Could not sign you in. Check your details and try again.')); },
     });
   }

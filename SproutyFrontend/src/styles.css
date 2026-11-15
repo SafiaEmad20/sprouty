@@ -40,3 +40,4 @@ router-outlet + *{display:block;animation:pageIn .4s ease both}
 .avatar{width:2.2rem;height:2.2rem;border-radius:50%;object-fit:cover;vertical-align:middle}
 .overlay{position:fixed;inset:0;background:rgba(52,66,45,.55);display:grid;place-items:center;padding:1rem;z-index:50;animation:pageIn .2s both}
 .dialog{max-width:400px;width:100%}
+.badge.idle{background:#ECE8CF;color:var(--muted)}

@@ -2,6 +2,9 @@ import { PlantRequirement, PlantStatus, SensorReading, StatusType } from '../mod
 
 // Mock-only. In production the BACKEND computes the status ("Plant Voice").
 export const VOICE: Record<StatusType, string> = {
+  NoData: "No readings yet. I'm waiting for my sensor.",
+  AirTooDry: "The air is too dry for me.",
+  AirTooHumid: "The air is too humid for me.",
   Healthy: "I feel great! Thanks for taking care of me.",
   NeedsWater: "I'm a little thirsty. Could I have some water?",
   TooMuchWater: "My roots are soaked. Please let me dry out.",
@@ -21,3 +24,12 @@ export function evaluate(plantId: string, r: SensorReading, q: PlantRequirement)
   else if (r.light > q.maxLight) t = 'TooMuchLight';
   return { id: 'st-' + r.id, plantId, statusType: t, message: VOICE[t], computedAt: r.recordedAt };
 }
+
+// The backend enum, in order, so a numeric status (0, 1, 2...) can be turned into a name.
+const BACKEND_STATUS = ['NoData', 'Healthy', 'NeedsWater', 'OverWatered', 'TooHot', 'TooCold', 'NeedsLight', 'AirTooDry', 'AirTooHumid'];
+/** Accepts the backend value (a number, or a name) and returns the frontend StatusType. */
+export function normalizeStatus(v: string | number): StatusType {
+  const name = typeof v === 'number' ? BACKEND_STATUS[v] : v;
+  return (name === 'OverWatered' ? 'TooMuchWater' : name) as StatusType;
+}
+export function statusTone(t: StatusType): 'ok' | 'bad' | 'idle' { return t === 'Healthy' ? 'ok' : t === 'NoData' ? 'idle' : 'bad'; }

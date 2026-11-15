@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { switchMap, timer } from 'rxjs';
 import { PlantsService } from '../services/plants.service';
 import { LatestReading, Plant, PlantType, SensorReading } from '../models';
+import { statusTone } from '../core/status';
 import { Gauge } from '../shared/gauge';
 import { HistoryChart } from '../shared/history-chart';
 
@@ -16,11 +17,12 @@ type Metric = 'moisture' | 'temperature' | 'light';
   template: `
   <div class="container">
     <a routerLink="/my-plants">← My plants</a>
+    @if (notFound()) { <p class="card">We couldn't find this plant. <a routerLink="/my-plants">Back to My plants</a></p> }
     @if (plant(); as p) {
       <h1>@if (p.imageUrl) { <img class="avatar" [src]="p.imageUrl" alt=""> } @else { <span>{{ type()?.emoji }}</span> } {{ p.nickname }}</h1>
     }
     @if (latest(); as l) {
-      <div class="bubble" [class.bad]="l.status.statusType !== 'Healthy'">
+      <div class="bubble" [class.bad]="isBad(l)">
         <p class="say">“{{ l.status.message }}”</p>
         <span class="muted">Updated {{ l.reading.recordedAt | date:'mediumTime' }} · refreshes every 15 seconds</span>
       </div>
@@ -49,13 +51,18 @@ type Metric = 'moisture' | 'temperature' | 'light';
 export class Dashboard {
   private svc = inject(PlantsService);
   private id = inject(ActivatedRoute).snapshot.params['id'];
+  notFound = signal(false);
+  isBad(l: LatestReading) { return statusTone(l.status.statusType) === 'bad'; }
   plant = signal<Plant | null>(null); type = signal<PlantType | null>(null);
   latest = signal<LatestReading | null>(null); history = signal<SensorReading[]>([]); metric = signal<Metric>('moisture');
   metrics: { key: Metric; label: string }[] = [
     { key: 'moisture', label: 'Moisture' }, { key: 'temperature', label: 'Temperature' }, { key: 'light', label: 'Light' }];
 
   constructor() {
-    this.svc.getPlant(this.id).subscribe(p => { this.plant.set(p); this.svc.getPlantType(p.plantTypeId).subscribe(r => this.type.set(r.type)); });
+    this.svc.getPlant(this.id).subscribe({
+      next: p => { this.plant.set(p); this.svc.getPlantType(p.plantTypeId).subscribe(r => this.type.set(r.type)); },
+      error: () => this.notFound.set(true),
+    });
     this.svc.getReadings(this.id).subscribe(r => this.history.set(r));
     // Live updates: polling now; replace with SignalR later if time allows.
     timer(0, 15000).pipe(switchMap(() => this.svc.getLatest(this.id)), takeUntilDestroyed(inject(DestroyRef))).subscribe(l => this.latest.set(l));

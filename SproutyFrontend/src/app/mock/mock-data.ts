@@ -1,4 +1,4 @@
-import { AppNotification, Plant, PlantRequirement, PlantType, SensorReading } from '../models';
+import { PlantRequirement, PlantType, SensorReading } from '../models';
 
 const T = (id: string, nameEn: string, nameAr: string, category: string, emoji: string, careNotes: string, careSteps: string[], sunSchedule: string): PlantType =>
   ({ id, nameEn, nameAr, category, emoji, imageUrl: '', careNotes, careSteps, sunSchedule });
@@ -36,26 +36,20 @@ export const MOCK_REQUIREMENTS: PlantRequirement[] = [
   req(7, 'pt7', [40, 65], [15, 30], [70, 100]),
 ];
 
-export const MOCK_PLANTS: Plant[] = [
-  { id: 'p1', userId: 'u1', plantTypeId: 'pt1', nickname: 'Bassil', imageUrl: '', addedAt: '2026-09-20T09:00:00Z' },
-  { id: 'p2', userId: 'u1', plantTypeId: 'pt3', nickname: 'Aloe Aly', imageUrl: '', addedAt: '2026-10-01T09:00:00Z' },
-];
 
-// 24 hourly readings (moisture, temperature, light). p1 dries out over time so the demo shows an alert.
-export function makeReadings(plantId: string): SensorReading[] {
-  const now = Date.now();
-  const thirsty = plantId === 'p1';
-  const r1 = (n: number) => Math.round(n * 10) / 10;
+// 24 hourly readings built around the plant's own ideal ranges, so every plant type looks right.
+// Half of the plants (by id) slowly dry out so the demo shows an alert.
+export function makeReadings(plantId: string, q: PlantRequirement): SensorReading[] {
+  const now = Date.now(), r1 = (n: number) => Math.round(n * 10) / 10;
+  const thirsty = [...plantId].reduce((a, c) => a + c.charCodeAt(0), 0) % 2 === 1;
+  const mid = (a: number, b: number) => (a + b) / 2, half = (a: number, b: number) => (b - a) / 2;
+  const mMid = mid(q.minMoisture, q.maxMoisture);
   return Array.from({ length: 24 }, (_, i) => ({
     id: `${plantId}-${i}`, sensorId: 's-' + plantId,
-    moisture: r1(thirsty ? 62 - i * 1.0 : 20 + Math.sin(i / 3) * 4),
-    temperature: r1(24 + Math.sin(i / 4) * 3),
-    light: r1(Math.max(65, 80 + Math.sin(i / 3) * 8)),
+    moisture: r1(thirsty ? mMid + (q.minMoisture - 4 - mMid) * (i / 23) : mMid + Math.sin(i / 3) * half(q.minMoisture, q.maxMoisture) * 0.4),
+    temperature: r1(mid(q.minTemperature, q.maxTemperature) + Math.sin(i / 4) * half(q.minTemperature, q.maxTemperature) * 0.35),
+    light: r1(mid(q.minLight, q.maxLight) + Math.sin(i / 3) * half(q.minLight, q.maxLight) * 0.3),
     recordedAt: new Date(now - (23 - i) * 3600_000).toISOString(),
   }));
 }
 
-export const MOCK_NOTIFICATIONS: AppNotification[] = [
-  { id: 'n1', plantId: 'p1', title: 'Bassil is thirsty', message: "I'm a little thirsty. Could I have some water?", type: 'NeedsWater', isRead: false, createdAt: new Date(Date.now() - 1800_000).toISOString() },
-  { id: 'n2', plantId: 'p2', title: 'Aloe Aly is happy', message: 'All good here. Thanks for the care!', type: 'Healthy', isRead: true, createdAt: new Date(Date.now() - 86400_000).toISOString() },
-];

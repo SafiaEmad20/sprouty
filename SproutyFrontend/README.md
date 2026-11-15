@@ -5,11 +5,19 @@
     ng serve        # http://localhost:4200
 Login/Register talk to the REAL backend (password min 8 characters). Start the backend first (https://localhost:7092), or set `USE_MOCK_AUTH = true` in `src/app/core/config.ts` to log in without it.
 
-## Mock vs real API
-`src/app/core/config.ts`: `USE_MOCK_AUTH = false` (auth is live). `USE_MOCK = true` keeps plants/readings/notifications on mock data until those endpoints exist.
-Development uses `proxy.conf.json` (`/api` -> https://localhost:7092), so CORS is not needed locally. Production needs CORS on the backend.
-Only the services in `src/app/services` and `core/auth.service.ts` talk to the API/mock.
-Mock data lives in `src/app/mock/mock-data.ts`.
+## What is live and what is mock
+Flags are in `src/app/core/config.ts`:
+
+| Feature | Flag | State |
+|---|---|---|
+| Login / Register | `USE_MOCK_AUTH = false` | LIVE (`/api/auth/*`) |
+| Plant library + plant details | `USE_MOCK_PLANT_TYPES = false` | LIVE (`/api/plant-types`) |
+| My plants, readings, status, alerts | `USE_MOCK = true` | mock (no backend endpoints yet). Plants are saved per account in the browser (localStorage), so a new account starts empty. |
+
+Start the backend first (https://localhost:7092). To work without it set `USE_MOCK_AUTH` and `USE_MOCK_PLANT_TYPES` to `true`.
+Development uses `proxy.conf.json` (`/api` -> https://localhost:7092), so CORS is not needed locally.
+Real plant types have no care notes/steps/sun schedule yet, so those sections hide until the backend adds them.
+Status values: `core/status.ts` -> `normalizeStatus()` accepts the backend enum as a number or a name (OverWatered -> TooMuchWater).
 
 ## Backend must provide
 JWT auth, CORS for http://localhost:4200, Swagger, DTOs in camelCase, plus:

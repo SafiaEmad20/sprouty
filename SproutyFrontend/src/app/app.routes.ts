@@ -3,7 +3,7 @@ import { authGuard } from './core/auth.guard';
 import { Home } from './features/home';
 import { AuthPage } from './features/auth';
 import { PlantLibrary } from './features/plant-library';
-import { PlantDetails } from './features/plant-details';
+import { AddPlant } from './features/add-plant';
 import { MyPlants } from './features/my-plants';
 import { Dashboard } from './features/dashboard';
 import { ReadingsForm } from './features/readings-form';
@@ -14,7 +14,8 @@ export const routes: Routes = [
   { path: 'login', component: AuthPage, data: { mode: 'login' } },
   { path: 'register', component: AuthPage, data: { mode: 'register' } },
   { path: 'plants', component: PlantLibrary, canActivate: [authGuard] },
-  { path: 'plants/:id', component: PlantDetails, canActivate: [authGuard] },
+  { path: 'plants/:id', component: AddPlant, canActivate: [authGuard] },
+  { path: 'add-plant', component: AddPlant, canActivate: [authGuard] },
   { path: 'my-plants', component: MyPlants, canActivate: [authGuard] },
   { path: 'dashboard/:id', component: Dashboard, canActivate: [authGuard] },
   { path: 'readings/:id', component: ReadingsForm, canActivate: [authGuard] },
