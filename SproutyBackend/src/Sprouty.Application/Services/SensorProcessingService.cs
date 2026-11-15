@@ -14,10 +14,14 @@ namespace Sprouty.Application.Services
     {
         private readonly ISensorProcessingRepository _repository;
 
+        private readonly INotificationService _notificationService;
+
         public SensorProcessingService(
-            ISensorProcessingRepository repository)
+             ISensorProcessingRepository repository,
+             INotificationService notificationService)
         {
             _repository = repository;
+            _notificationService = notificationService;
         }
 
 
@@ -142,6 +146,9 @@ namespace Sprouty.Application.Services
                 }
             }
 
+            
+            var previousStatus = await _repository.GetLatestPlantStatusAsync(sensor.PlantId);
+
             var statusRecord = new PlantStatusRecord
             {
                 Id = Guid.NewGuid(),
@@ -153,6 +160,17 @@ namespace Sprouty.Application.Services
 
             await _repository.SavePlantStatusAsync(statusRecord);
 
+            //  التحقق من قاعدة منع تكرار الإشعارات
+            if (IsProblemStatus(status) && (previousStatus == null || previousStatus.StatusType != status))
+            {
+                var title = GetNotificationTitle(status);
+                await _notificationService.CreateNotificationAsync(
+                    sensor.PlantId,
+                    title,
+                    message,
+                    NotificationType.NeedsAttention);
+            }
+
             return new PlantStatusResponseDto
             {
                 PlantId = statusRecord.PlantId,
@@ -160,6 +178,8 @@ namespace Sprouty.Application.Services
                 Message = statusRecord.Message,
                 ComputedAt = statusRecord.ComputedAt
             };
+
+
         }
 
         private static double ToLightLevel(double rawLight)
@@ -168,5 +188,25 @@ namespace Sprouty.Application.Services
 
             return Math.Clamp(level, 0.0, 100.0);
         }
+
+
+        private static bool IsProblemStatus(PlantStatus status)
+        {
+            return status != PlantStatus.Healthy && status != PlantStatus.NoData;
+        }
+
+        private static string GetNotificationTitle(PlantStatus status) => status switch
+        {
+            PlantStatus.NeedsWater => "Water Needed",
+            PlantStatus.OverWatered => "Overwatered",
+            PlantStatus.TooHot => "High Temperature",
+            PlantStatus.TooCold => "Low Temperature",
+            PlantStatus.AirTooDry => "Dry Air",
+            PlantStatus.AirTooHumid => "Humid Air",
+            PlantStatus.NeedsLight => "Light Needed",
+            _ => "Plant Alert"
+        };
+
+
     }
 }

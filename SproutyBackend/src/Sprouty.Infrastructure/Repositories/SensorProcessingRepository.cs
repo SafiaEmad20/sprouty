@@ -52,5 +52,13 @@ namespace Sprouty.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<PlantStatusRecord?> GetLatestPlantStatusAsync(Guid plantId)
+        {
+            return await _context.PlantStatuses
+                .Where(s => s.PlantId == plantId)
+                .OrderByDescending(s => s.ComputedAt)
+                .FirstOrDefaultAsync();
+        }
+
     }
 }

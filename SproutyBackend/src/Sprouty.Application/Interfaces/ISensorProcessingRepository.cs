@@ -12,5 +12,7 @@ namespace Sprouty.Application.Interfaces
         Task SavePlantStatusAsync(PlantStatusRecord statusRecord);
 
         Task AddSensorReadingAsync(SensorReading reading);
+
+        Task<PlantStatusRecord?> GetLatestPlantStatusAsync(Guid plantId);
     }
 }
