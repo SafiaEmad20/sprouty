@@ -25,24 +25,60 @@ namespace Sprouty.Api.Controllers
         
         // عرض إشعارات المستخدم الحالي
      
+        // ?unreadOnly=true يرجع الإشعارات اللي لسه متقريتش بس
         [HttpGet]
         public async Task<ActionResult<IEnumerable<NotificationResponseDto>>> GetUserNotifications(
+            [FromQuery] bool unreadOnly = false,
+            CancellationToken cancellationToken = default)
+        {
+            var userId = GetCurrentUserId();
+            var notifications = await _notificationService.GetUserNotificationsAsync(userId, unreadOnly, cancellationToken);
+            return Ok(notifications);
+        }
+
+        // عدد الإشعارات اللي لسه متقريتش
+        [HttpGet("unread-count")]
+        public async Task<ActionResult<UnreadCountResponseDto>> GetUnreadCount(
             CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            var notifications = await _notificationService.GetUserNotificationsAsync(userId, cancellationToken);
-            return Ok(notifications);
+            var result = await _notificationService.GetUnreadCountAsync(userId, cancellationToken);
+            return Ok(result);
         }
 
         // تحديد إشعار معين كمقروء
       
+        // PATCH و PUT الاتنين شغالين (الفرونت بيبعت PUT)
         [HttpPatch("{id:guid}/read")]
+        [HttpPut("{id:guid}/read")]
         public async Task<IActionResult> MarkAsRead(
             Guid id,
             CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
             await _notificationService.MarkAsReadAsync(id, userId, cancellationToken);
+            return NoContent();
+        }
+
+        // تحديد كل الإشعارات كمقروءة
+        [HttpPatch("read-all")]
+        [HttpPut("read-all")]
+        public async Task<ActionResult<MarkAllReadResponseDto>> MarkAllAsRead(
+            CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _notificationService.MarkAllAsReadAsync(userId, cancellationToken);
+            return Ok(result);
+        }
+
+        // حذف إشعار
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(
+            Guid id,
+            CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            await _notificationService.DeleteAsync(id, userId, cancellationToken);
             return NoContent();
         }
 

@@ -19,14 +19,39 @@ namespace Sprouty.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Notification>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Notification>> GetByUserIdAsync(Guid userId, bool unreadOnly = false, CancellationToken cancellationToken = default)
         {
-            return await _context.Notifications
+            var query = _context.Notifications
                 .AsNoTracking()
                 .Include(n => n.Plant)
-                .Where(n => n.Plant.UserId == userId)
+                .Where(n => n.Plant.UserId == userId);
+
+            if (unreadOnly)
+            {
+                query = query.Where(n => !n.IsRead);
+            }
+
+            return await query
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<int> CountUnreadAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Notifications
+                .CountAsync(n => n.Plant.UserId == userId && !n.IsRead, cancellationToken);
+        }
+
+        public async Task<List<Notification>> GetUnreadByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Notifications
+                .Where(n => n.Plant.UserId == userId && !n.IsRead)
+                .ToListAsync(cancellationToken);
+        }
+
+        public void Remove(Notification notification)
+        {
+            _context.Notifications.Remove(notification);
         }
 
         public async Task<Notification?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

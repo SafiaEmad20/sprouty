@@ -17,6 +17,10 @@ namespace Sprouty.Application.Interfaces
 
         void Remove(Plant plant);
 
+        // Marks the plant's readings, status history and notifications for removal
+        // (they are deleted on the next SaveChangesAsync). The sensors are kept.
+        Task RemoveHistoryAsync(Guid plantId, CancellationToken cancellationToken = default);
+
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

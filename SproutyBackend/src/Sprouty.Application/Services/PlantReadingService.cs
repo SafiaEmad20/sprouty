@@ -4,6 +4,7 @@ using Sprouty.Application.DTOs.Sensors;
 using Sprouty.Application.Exceptions;
 using Sprouty.Application.Interfaces;
 using Sprouty.Domain.Entities;
+using Sprouty.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,10 +91,16 @@ namespace Sprouty.Application.Services
         {
             var plant = await GetUserPlantOrThrowAsync(plantId, userId, cancellationToken);
 
-            var sensor = plant.Sensors.FirstOrDefault();
+            // القراءة بتتسجل على الـSensor الـActive بتاع النبتة بس
+            var sensor = plant.Sensors.FirstOrDefault(s => s.Status == SensorStatus.Active);
 
             if (sensor is null)
             {
+                if (plant.Sensors.Count > 0)
+                {
+                    throw new SensorOfflineException("The plant's sensor is offline.");
+                }
+
                 throw new NotFoundException("No sensor is linked to this plant.");
             }
 

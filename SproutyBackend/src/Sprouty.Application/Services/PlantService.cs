@@ -96,6 +96,11 @@ namespace Sprouty.Application.Services
             {
                 await EnsurePlantTypeExistsAsync(request.PlantTypeId, cancellationToken);
                 plant.PlantTypeId = request.PlantTypeId;
+
+                // النوع اتغير: القراءات والحالات والإشعارات القديمة اتحسبت على النوع القديم،
+                // فبنمسحها والنبتة تبدأ من جديد بالبيانات اللي هتتضاف بعد كده.
+                // (الـSensor نفسه بيفضل زي ما هو)
+                await _plantRepository.RemoveHistoryAsync(plant.Id, cancellationToken);
             }
 
             plant.Nickname = nickname;
@@ -169,9 +174,30 @@ namespace Sprouty.Application.Services
             return trimmed;
         }
 
+        // الصورة اختيارية: لو فاضية بتتسجل null، ولو مبعوتة لازم تكون لينك http أو https صحيح.
         private static string? NormalizeImageUrl(string? imageUrl)
         {
-            return string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim();
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return null;
+            }
+
+            var trimmed = imageUrl.Trim();
+
+            if (trimmed.Length > 500)
+            {
+                throw new ValidationException("Image URL must be 500 characters or fewer.");
+            }
+
+            var isValidUrl = Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
+                             && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+            if (!isValidUrl)
+            {
+                throw new ValidationException("Image URL must be a valid link that starts with http:// or https://.");
+            }
+
+            return trimmed;
         }
 
         private static PlantResponseDto MapToResponseDto(Plant plant)
@@ -186,7 +212,8 @@ namespace Sprouty.Application.Services
                 Nickname = plant.Nickname,
                 ImageUrl = plant.ImageUrl,
                 AddedAt = plant.AddedAt,
-                SensorId = plant.Sensors.FirstOrDefault()?.Id
+                SensorId = (plant.Sensors.FirstOrDefault(s => s.Status == SensorStatus.Active)
+                            ?? plant.Sensors.FirstOrDefault())?.Id
             };
         }
     }

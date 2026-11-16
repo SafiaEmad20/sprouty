@@ -6,7 +6,13 @@ namespace Sprouty.Application.Interfaces
 {
     public interface INotificationService
     {
-        Task<IEnumerable<NotificationResponseDto>> GetUserNotificationsAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<NotificationResponseDto>> GetUserNotificationsAsync(Guid userId, bool unreadOnly = false, CancellationToken cancellationToken = default);
+
+        Task<UnreadCountResponseDto> GetUnreadCountAsync(Guid userId, CancellationToken cancellationToken = default);
+
+        Task<MarkAllReadResponseDto> MarkAllAsReadAsync(Guid userId, CancellationToken cancellationToken = default);
+
+        Task DeleteAsync(Guid notificationId, Guid userId, CancellationToken cancellationToken = default);
 
         Task MarkAsReadAsync(Guid notificationId, Guid userId, CancellationToken cancellationToken = default);
 

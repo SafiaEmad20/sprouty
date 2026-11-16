@@ -22,9 +22,10 @@ namespace Sprouty.Application.Services
 
         public async Task<IEnumerable<NotificationResponseDto>> GetUserNotificationsAsync(
             Guid userId,
+            bool unreadOnly = false,
             CancellationToken cancellationToken = default)
         {
-            var notifications = await _notificationRepository.GetByUserIdAsync(userId, cancellationToken);
+            var notifications = await _notificationRepository.GetByUserIdAsync(userId, unreadOnly, cancellationToken);
 
             return notifications.Select(n => new NotificationResponseDto
             {
@@ -44,6 +45,62 @@ namespace Sprouty.Application.Services
             Guid userId,
             CancellationToken cancellationToken = default)
         {
+            var notification = await GetUserNotificationOrThrowAsync(notificationId, userId, cancellationToken);
+
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                await _notificationRepository.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        // عدد الإشعارات اللي لسه متقريتش (عشان الرقم اللي على الجرس)
+        public async Task<UnreadCountResponseDto> GetUnreadCountAsync(
+            Guid userId,
+            CancellationToken cancellationToken = default)
+        {
+            var count = await _notificationRepository.CountUnreadAsync(userId, cancellationToken);
+
+            return new UnreadCountResponseDto { UnreadCount = count };
+        }
+
+        // تحديد كل إشعارات المستخدم كمقروءة مرة واحدة
+        public async Task<MarkAllReadResponseDto> MarkAllAsReadAsync(
+            Guid userId,
+            CancellationToken cancellationToken = default)
+        {
+            var unread = await _notificationRepository.GetUnreadByUserIdAsync(userId, cancellationToken);
+
+            foreach (var notification in unread)
+            {
+                notification.IsRead = true;
+            }
+
+            if (unread.Count > 0)
+            {
+                await _notificationRepository.SaveChangesAsync(cancellationToken);
+            }
+
+            return new MarkAllReadResponseDto { MarkedCount = unread.Count };
+        }
+
+        // حذف إشعار
+        public async Task DeleteAsync(
+            Guid notificationId,
+            Guid userId,
+            CancellationToken cancellationToken = default)
+        {
+            var notification = await GetUserNotificationOrThrowAsync(notificationId, userId, cancellationToken);
+
+            _notificationRepository.Remove(notification);
+            await _notificationRepository.SaveChangesAsync(cancellationToken);
+        }
+
+        private async Task<Notification> GetUserNotificationOrThrowAsync(
+            Guid notificationId,
+            Guid userId,
+            CancellationToken cancellationToken)
+        {
             var notification = await _notificationRepository.GetByIdAsync(notificationId, cancellationToken);
 
             if (notification == null || notification.Plant == null || notification.Plant.UserId != userId)
@@ -51,11 +108,7 @@ namespace Sprouty.Application.Services
                 throw new NotFoundException("Notification not found.");
             }
 
-            if (!notification.IsRead)
-            {
-                notification.IsRead = true;
-                await _notificationRepository.SaveChangesAsync(cancellationToken);
-            }
+            return notification;
         }
 
         public async Task CreateNotificationAsync(

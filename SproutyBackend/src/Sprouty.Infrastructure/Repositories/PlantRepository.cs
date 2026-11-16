@@ -51,6 +51,27 @@ namespace Sprouty.Infrastructure.Repositories
             _context.Plants.Remove(plant);
         }
 
+        public async Task RemoveHistoryAsync(
+            Guid plantId,
+            CancellationToken cancellationToken = default)
+        {
+            var readings = await _context.SensorReadings
+                .Where(r => r.Sensor.PlantId == plantId)
+                .ToListAsync(cancellationToken);
+
+            var statuses = await _context.PlantStatuses
+                .Where(s => s.PlantId == plantId)
+                .ToListAsync(cancellationToken);
+
+            var notifications = await _context.Notifications
+                .Where(n => n.PlantId == plantId)
+                .ToListAsync(cancellationToken);
+
+            _context.SensorReadings.RemoveRange(readings);
+            _context.PlantStatuses.RemoveRange(statuses);
+            _context.Notifications.RemoveRange(notifications);
+        }
+
         public async Task SaveChangesAsync(
             CancellationToken cancellationToken = default)
         {
