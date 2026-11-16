@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ISensorProcessingRepository,SensorProcessingRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IPlantRepository, PlantRepository>();
 
         return services;
     }

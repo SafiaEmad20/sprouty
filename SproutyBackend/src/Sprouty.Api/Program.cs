@@ -48,6 +48,10 @@ namespace Sprouty.Api
             builder.Services.AddScoped<ISensorProcessingService,SensorProcessingService>();
 
 
+            // Register Plant service (Plant CRUD).
+            builder.Services.AddScoped<IPlantService, PlantService>();
+
+
 
             // Configure JWT authentication and token validation.
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
