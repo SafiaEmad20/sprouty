@@ -1,4 +1,5 @@
-﻿using Sprouty.Application.DTOs.Sensors;
+﻿using Sprouty.Application.DTOs.Readings;
+using Sprouty.Application.DTOs.Sensors;
 using System;
 using System.Threading.Tasks;
 
@@ -8,6 +9,6 @@ namespace Sprouty.Application.Interfaces
     {
         Task<PlantStatusResponseDto> ProcessReadingAsync(Guid sensorId);
 
-        Task AddReadingAsync(Guid sensorId, AddSensorReadingRequestDto request);
+        Task<SensorReadingResponseDto> AddReadingAsync(Guid sensorId, AddSensorReadingRequestDto request);
     }
 }

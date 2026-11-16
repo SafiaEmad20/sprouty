@@ -1,4 +1,5 @@
 ﻿
+using Sprouty.Application.DTOs.Readings;
 using Sprouty.Application.DTOs.Sensors;
 using Sprouty.Application.Interfaces;
 using Sprouty.Domain.Entities;
@@ -25,7 +26,7 @@ namespace Sprouty.Application.Services
         }
 
 
-        public async Task AddReadingAsync(Guid sensorId,AddSensorReadingRequestDto request)
+        public async Task<SensorReadingResponseDto> AddReadingAsync(Guid sensorId,AddSensorReadingRequestDto request)
         {
             var sensor = await _repository.GetSensorWithLatestReadingAsync(sensorId);
 
@@ -67,6 +68,17 @@ namespace Sprouty.Application.Services
             };
 
             await _repository.AddSensorReadingAsync(reading);
+
+            return new SensorReadingResponseDto
+            {
+                Id = reading.Id,
+                SensorId = reading.SensorId,
+                Moisture = reading.Moisture,
+                Temperature = reading.Temperature,
+                Humidity = reading.Humidity,
+                Light = reading.Light,
+                RecordedAt = reading.RecordedAt
+            };
         }
 
 

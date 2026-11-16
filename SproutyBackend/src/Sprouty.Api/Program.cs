@@ -52,6 +52,10 @@ namespace Sprouty.Api
             builder.Services.AddScoped<IPlantService, PlantService>();
 
 
+            // Register Plant Readings service (readings history, latest reading, add reading).
+            builder.Services.AddScoped<IPlantReadingService, PlantReadingService>();
+
+
 
             // Configure JWT authentication and token validation.
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

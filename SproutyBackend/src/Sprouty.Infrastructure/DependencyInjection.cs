@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IPlantRepository, PlantRepository>();
+        services.AddScoped<IPlantReadingRepository, PlantReadingRepository>();
 
         return services;
     }
