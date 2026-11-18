@@ -16,6 +16,7 @@ namespace Sprouty.Infrastructure.Persistence
         public DbSet<SensorReading> SensorReadings => Set<SensorReading>();
         public DbSet<PlantStatusRecord> PlantStatuses => Set<PlantStatusRecord>();
         public DbSet<Notification> Notifications => Set<Notification>();
+        public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

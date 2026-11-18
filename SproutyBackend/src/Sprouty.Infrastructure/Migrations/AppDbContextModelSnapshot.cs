@@ -63,6 +63,41 @@ namespace Sprouty.Infrastructure.Migrations
                     b.ToTable("notifications", (string)null);
                 });
 
+            modelBuilder.Entity("Sprouty.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PasswordResetTokens_TokenHash");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_PasswordResetTokens_UserId");
+
+                    b.ToTable("PasswordResetTokens", (string)null);
+                });
+
             modelBuilder.Entity("Sprouty.Domain.Entities.Plant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -399,6 +434,17 @@ namespace Sprouty.Infrastructure.Migrations
                     b.Navigation("Plant");
                 });
 
+            modelBuilder.Entity("Sprouty.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.HasOne("Sprouty.Domain.Entities.User", "User")
+                        .WithMany("PasswordResetTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Sprouty.Domain.Entities.Plant", b =>
                 {
                     b.HasOne("Sprouty.Domain.Entities.PlantType", "PlantType")
@@ -485,6 +531,8 @@ namespace Sprouty.Infrastructure.Migrations
 
             modelBuilder.Entity("Sprouty.Domain.Entities.User", b =>
                 {
+                    b.Navigation("PasswordResetTokens");
+
                     b.Navigation("Plants");
                 });
 #pragma warning restore 612, 618

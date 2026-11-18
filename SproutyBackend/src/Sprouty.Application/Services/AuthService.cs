@@ -1,27 +1,30 @@
-﻿
+﻿using System.Security.Cryptography;
+using System.Text;
 using Sprouty.Application.DTOs.Auth;
+using Sprouty.Application.Exceptions;
 using Sprouty.Application.Interfaces;
 using Sprouty.Domain.Entities;
 using Sprouty.Domain.Enums;
-using Sprouty.Application.Exceptions;
 
 namespace Sprouty.Application.Services
 {
-
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasherService _passwordHasher;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IEmailService _emailService;
 
         public AuthService(
             IUserRepository userRepository,
             IPasswordHasherService passwordHasher,
-            IJwtTokenService jwtTokenService)
+            IJwtTokenService jwtTokenService,
+            IEmailService emailService)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _jwtTokenService = jwtTokenService;
+            _emailService = emailService;
         }
 
         public async Task<AuthResponse> RegisterAsync(
@@ -78,6 +81,75 @@ namespace Sprouty.Application.Services
                 _jwtTokenService.GenerateToken(user);
 
             return MapToAuthResponse(user, token, expiresAt);
+        }
+
+        //  منطق Forgot Password: توليد التوكن وإرسال الإيميل
+        public async Task ForgotPasswordAsync(
+            ForgotPasswordRequest request,
+            CancellationToken cancellationToken = default)
+
+        {
+            string email = request.Email.Trim().ToLowerInvariant();
+            var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+
+           
+            if (user is null) return;
+           
+            // توليد Secure Random Token 
+            string rawToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+
+            // تشفير التوكن 
+            string tokenHash = HashToken(rawToken);
+
+            var resetToken = new PasswordResetToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                TokenHash = tokenHash,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _userRepository.AddResetTokenAsync(resetToken, cancellationToken);
+            await _userRepository.SaveChangesAsync(cancellationToken);
+
+            // رابط إعادة التعيين
+            string resetLink = $"https://localhost:7092/api/auth/reset-password?token={rawToken}&email={Uri.EscapeDataString(user.Email)}";
+
+            await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink, cancellationToken);
+        }
+
+        //  منطق Reset Password
+        public async Task ResetPasswordAsync(
+            ResetPasswordRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            string email = request.Email.Trim().ToLowerInvariant();
+            string tokenHash = HashToken(request.Token);
+
+            var resetToken = await _userRepository.GetResetTokenByHashAsync(tokenHash, cancellationToken);
+
+            if (resetToken is null ||
+                resetToken.User.Email != email ||
+                resetToken.UsedAt != null ||
+                resetToken.ExpiresAt < DateTime.UtcNow)
+            {
+                throw new InvalidOperationException("Invalid or expired password reset token.");
+            }
+
+            // تشفير وتحديث كلمة المرور الجديدة
+            resetToken.User.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+
+            // تعليم التوكن بأنه تم استخدامه
+            resetToken.UsedAt = DateTime.UtcNow;
+
+            await _userRepository.SaveChangesAsync(cancellationToken);
+        }
+
+        private static string HashToken(string token)
+        {
+            byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+            return Convert.ToHexString(bytes);
         }
 
         private static AuthResponse MapToAuthResponse(

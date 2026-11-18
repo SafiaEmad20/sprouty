@@ -10,6 +10,7 @@ using Sprouty.Application.Services;
 using Sprouty.Domain.Entities;
 using Sprouty.Infrastructure;
 using Sprouty.Infrastructure.Persistence;
+using Sprouty.Infrastructure.Settings;
 using System.Text;
 namespace Sprouty.Api
 {
@@ -55,7 +56,9 @@ namespace Sprouty.Api
             // Register Plant Readings service (readings history, latest reading, add reading).
             builder.Services.AddScoped<IPlantReadingService, PlantReadingService>();
 
-
+            // Configure Email Settings (SMTP) for Password Reset and Notifications
+            builder.Services.Configure<EmailSettings>(
+                builder.Configuration.GetSection("EmailSettings"));
 
             // Configure JWT authentication and token validation.
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

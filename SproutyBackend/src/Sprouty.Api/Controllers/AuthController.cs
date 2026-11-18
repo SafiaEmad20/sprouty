@@ -1,7 +1,7 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Sprouty.Application.DTOs.Auth;
 using Sprouty.Application.Interfaces;
+
 namespace Sprouty.Api.Controllers;
 
 [ApiController]
@@ -31,5 +31,23 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 
-    
+    //  Endpoint لطلب استرجاع كلمة المرور
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(
+        ForgotPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _authService.ForgotPasswordAsync(request, cancellationToken);
+        return Ok(new { message = "If the email is registered, a password reset link has been sent." });
+    }
+
+    //  Endpoint لتعيين كلمة المرور الجديدة باستخدام التوكن
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(
+        ResetPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _authService.ResetPasswordAsync(request, cancellationToken);
+        return Ok(new { message = "Password has been reset successfully." });
+    }
 }
