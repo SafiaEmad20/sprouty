@@ -10,6 +10,13 @@ namespace Sprouty.Application.Interfaces
         Task<AuthResponse> RegisterAsync(RegisterRequest request);
 
         Task<AuthResponse> LoginAsync(LoginRequest request);
+
+        Task ForgotPasswordAsync(
+            ForgotPasswordRequest request,
+            CancellationToken cancellationToken = default);
+
+        Task ResetPasswordAsync(
+            ResetPasswordRequest request,
+            CancellationToken cancellationToken = default);
     }
 }
-

@@ -1,14 +1,21 @@
 ﻿using Sprouty.Domain.Entities;
+
 namespace Sprouty.Application.Interfaces
+
 {
+
     public interface IUserRepository
     {
-        Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
 
-        Task AddAsync(User user);
+        Task AddAsync(User user, CancellationToken cancellationToken = default);
 
-        Task<bool> EmailExistsAsync(string email);
+        Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default);
 
-        Task SaveChangesAsync();
+        Task AddResetTokenAsync(PasswordResetToken token, CancellationToken cancellationToken = default);
+
+        Task<PasswordResetToken?> GetResetTokenByHashAsync(string tokenHash, CancellationToken cancellationToken = default);
+
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
