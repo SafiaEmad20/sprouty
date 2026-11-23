@@ -4,6 +4,23 @@
 
 🚧 **Under Active Development** — DEPI Full Stack .NET Capstone Project
 
+| | |
+|---|---|
+| **Project Name** | SPROUTY — Smart Plant Care Companion |
+| **Program** | Digital Egypt Pioneers Initiative (DEPI) — Capstone Project |
+| **Track** | Software Development — Full Stack .NET Web Developer |
+| **Company** | YAT Learning Centers |
+| **Group** | YAT849A_CAI5_SWD5_S8_DEPI5 |
+| **Instructor** | Ayed Ali Ayed |
+| **Team Members** | [6 members](#-team-members) |
+| **Work Plan** | [See Work Plan](#-work-plan) |
+| **KPIs** | [See KPIs](#-kpis) |
+| **Project Files** | [See Project Files](#-project-files) |
+
+---
+
+# 💡 Project Idea
+
 SPROUTY is a full-stack web application that helps beginner plant owners understand and care for their plants through simple, human-friendly messages instead of raw sensor values.
 
 Instead of displaying technical readings like:
@@ -218,14 +235,20 @@ Feature flags in `SproutyFrontend/src/app/core/config.ts` switch each area betwe
 SPROUTY includes an **ESP32-based IoT device** with sensors placed next to the plant. The hardware components are ready and the firmware is under development. Once connected, the device will send plant readings to the backend automatically, and the results will appear in the app as plant status and notifications.
 
 ---
-## 📖 Documentation
+# 📁 Project Files
 
-Project documentation is available in the `Docs/` directory:
+All project files are stored directly in this repository.
 
-- **Product Definition** (`Docs/Product-Definition.pdf`)
-- **Backend guide & API reference** ([`SproutyBackend/README.md`](SproutyBackend/README.md))
-- **Frontend guide** ([`SproutyFrontend/README.md`](SproutyFrontend/README.md))
-- **Live API documentation**: Swagger UI at `https://localhost:7092/swagger` while the API is running
+| File / Folder | Contents |
+|---|---|
+| [`Docs/Product-Definition.pdf`](Docs/Product-Definition.pdf) | Product Definition: vision, personas, user journey, MVP scope, plant voice guide, architecture, risks, success metrics and roadmap |
+| [`SproutyBackend/`](SproutyBackend/) | ASP.NET Core Web API source code (Clean Architecture) |
+| [`SproutyBackend/README.md`](SproutyBackend/README.md) | Backend setup guide and full API reference |
+| [`SproutyFrontend/`](SproutyFrontend/) | Angular 20 client source code |
+| [`SproutyFrontend/README.md`](SproutyFrontend/README.md) | Frontend setup guide |
+| Swagger UI | Live API documentation at `https://localhost:7092/swagger` while the API is running |
+
+The ESP32 device firmware will be added to this repository once it is completed.
 
 ---
 
@@ -238,18 +261,70 @@ Project documentation is available in the `Docs/` directory:
 
 ---
 
-# 👥 Team
+# 👥 Team Members
 
-Developed as a **DEPI Full Stack .NET Web Developer Capstone Project**.
+Developed as a **DEPI Full Stack .NET Web Developer Capstone Project** at **YAT Learning Centers**.
 
-| Name | Role |
-|------|------|
-| Sohila | Backend Developer & Product Lead |
-| Ahmed | Backend Developer |
-| Reem | Frontend Developer |
-| safia | Frontend Developer |
-| Abdelrahman | Embedded Systems / IoT |
-| Mohamed | Embedded Systems / IoT |
+| # | Name | Role |
+|---|------|------|
+| 1 | Sohila Ismail Mohamed | Product Lead & Backend Developer |
+| 2 | Ahmed Farag | Backend Developer |
+| 3 | Safia Emad Mohamed | Frontend Developer |
+| 4 | Reem Ahmed | Frontend Developer |
+| 5 | Abdelrahman Ashraf | Embedded Systems / IoT Developer |
+| 6 | Mohamed Ahmed | Embedded Systems / IoT Developer |
+
+---
+
+# 🧩 Roles & Responsibilities
+
+| Member | Responsibilities |
+|---|---|
+| **Sohila** — Product Lead & Backend | Product definition, personas, user journey, MVP scope and system design; plant management (CRUD), sensor reading and notification endpoints; project documentation |
+| **Ahmed** — Backend | Clean Architecture setup, domain model and database migrations; JWT authentication and global exception handling; plant types API; sensor reading processing and plant status evaluation; notifications; forgot / reset password |
+| **Safia** — Frontend | Angular application setup; connecting authentication and plant types to the backend API; add-plant page; repository owner |
+| **Reem** — Frontend | Angular user interface and pages |
+| **Abdelrahman** — IoT | ESP32 hardware and sensors; device firmware |
+| **Mohamed** — IoT | ESP32 hardware and sensors; device firmware |
+
+---
+
+# 🎓 Instructor
+
+**Ayed Ali Ayed** — YAT Learning Centers, Digital Egypt Pioneers Initiative (DEPI)
+
+---
+
+# 🗓 Work Plan
+
+| # | Phase | Scope | Timeline | Status |
+|---|---|---|---|---|
+| 1 | Discovery | User survey (40 respondents), results analysis and competitor research | Before Sep 2026 | ✅ Done |
+| 2 | Phase 0 — Planning | Product definition, personas, user journey, MVP scope and tech stack | 26 Sep – 3 Oct 2026 | ✅ Done |
+| 3 | Project Setup | Repository, Clean Architecture backend, domain model, database migrations, Angular app | 11 – 19 Oct 2026 | ✅ Done |
+| 4 | Authentication | JWT authentication, global error handling, frontend login / register connected to the API | 22 – 25 Oct 2026 | ✅ Done |
+| 5 | Core Backend Features | Plant types API, sensor reading processing and plant health evaluation | 24 – 30 Oct 2026 | ✅ Done |
+| 6 | Plants, Readings & Notifications | Plant CRUD, reading history, notifications, validation and testing | 15 – 16 Nov 2026 | ✅ Done |
+| 7 | Account Recovery | Forgot / reset password by email | 18 Nov 2026 | ✅ Done |
+| 8 | IoT Device | ESP32 hardware assembly and firmware | Nov 2026 | 🚧 In Progress |
+| 9 | Integration | Connecting frontend, backend and the IoT device end to end | Upcoming | 🔜 Next |
+| 10 | Testing & Improvement | Unit tests, internal testing and bug fixing | Upcoming | 🔜 Planned |
+| 11 | User Testing | Trial with 5–10 real users from the target group (ages 18–25) | Upcoming | 🔜 Planned |
+| 12 | Final Delivery | Documentation, presentation and demo | Upcoming | 🔜 Planned |
+
+---
+
+# 📈 KPIs
+
+Success metrics defined in the Product Definition for the MVP:
+
+| KPI | Target |
+|---|---|
+| Time for a new user to add their first plant | Less than **2 minutes** |
+| Sensor readings delivered successfully to the app | At least **90%** |
+| Clarity of plant status | Users understand their plant's condition **without seeing a single technical number** |
+| Daily engagement | Users open the app **at least once a day** during the first two weeks |
+| User satisfaction | Positive feedback from a test group of **5–10 real users** after two weeks of use |
 
 ---
 
