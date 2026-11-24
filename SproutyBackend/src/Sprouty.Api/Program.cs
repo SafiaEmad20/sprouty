@@ -12,6 +12,9 @@ using Sprouty.Infrastructure;
 using Sprouty.Infrastructure.Persistence;
 using Sprouty.Infrastructure.Settings;
 using System.Text;
+using Sprouty.Api.BackgroundServices;
+using Sprouty.Infrastructure.Services;
+
 namespace Sprouty.Api
 {
     public class Program
@@ -38,6 +41,12 @@ namespace Sprouty.Api
 
             // Register Application and Infrastructure services
             builder.Services.AddInfrastructure();
+
+            builder.Services.AddSingleton<ISensorReadingStore, InMemorySensorReadingStore>();
+            builder.Services.AddHostedService<SerialSensorReaderService>();
+
+
+
             builder.Services.AddScoped<IAuthService, AuthService>();
 
 
