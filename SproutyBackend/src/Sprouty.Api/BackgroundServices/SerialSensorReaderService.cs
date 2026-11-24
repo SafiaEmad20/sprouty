@@ -66,12 +66,17 @@ public sealed class SerialSensorReaderService : BackgroundService
                     try
                     {
                         var dto = JsonSerializer.Deserialize<SensorReadingDto>(trimmed, JsonOptions);
-                        if (dto is not null)
+                        if (dto is not null &&
+                            !double.IsNaN(dto.Temperature) && !double.IsInfinity(dto.Temperature) &&
+                            !double.IsNaN(dto.Humidity) && !double.IsInfinity(dto.Humidity))
                         {
+                            dto.LightLevel = Math.Clamp(dto.LightLevel, 0, 100);
+                            dto.SoilPercent = Math.Clamp(dto.SoilPercent, 0, 100);
+
                             _readingStore.Update(dto);
                             _logger.LogInformation(
-                                "Sensor reading updated -> Temp: {Temp}, Hum: {Hum}, LDR: {Ldr}, Soil: {SoilRaw} ({SoilPct}%)",
-                                dto.Temperature, dto.Humidity, dto.LdrRaw, dto.SoilRaw, dto.SoilPercent);
+                                "Sensor reading updated -> Temp: {Temp}, Hum: {Hum}, Light: {Light}% (LDR: {Ldr}), Soil: {SoilPct}% (Raw: {SoilRaw})",
+                                dto.Temperature, dto.Humidity, dto.LightLevel, dto.LdrRaw, dto.SoilPercent, dto.SoilRaw);
                         }
                     }
                     catch (JsonException ex)

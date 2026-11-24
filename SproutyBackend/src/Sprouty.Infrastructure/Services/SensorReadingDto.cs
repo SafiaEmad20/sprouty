@@ -5,13 +5,16 @@ namespace Sprouty.Infrastructure.Services;
 public sealed class SensorReadingDto
 {
     [JsonPropertyName("temperature")]
-    public double? Temperature { get; set; }
+    public double Temperature { get; set; }
 
     [JsonPropertyName("humidity")]
-    public double? Humidity { get; set; }
+    public double Humidity { get; set; }
 
     [JsonPropertyName("ldrRaw")]
     public int LdrRaw { get; set; }
+
+    [JsonPropertyName("lightLevel")]
+    public int LightLevel { get; set; }
 
     [JsonPropertyName("soilRaw")]
     public int SoilRaw { get; set; }
@@ -53,4 +56,3 @@ public sealed class InMemorySensorReadingStore : ISensorReadingStore
         }
     }
 }
-
