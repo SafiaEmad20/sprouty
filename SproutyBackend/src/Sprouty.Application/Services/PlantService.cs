@@ -1,3 +1,4 @@
+using Sprouty.Application.Common;
 using Sprouty.Application.DTOs.Plants;
 using Sprouty.Application.Exceptions;
 using Sprouty.Application.Interfaces;
@@ -25,13 +26,35 @@ namespace Sprouty.Application.Services
         }
 
         // عرض نباتات المستخدم الحالي
+        // ولو فيه search: بيرجع النباتات اللي اسمها أو نوعها شبه الكلام، والأقرب في الأول.
         public async Task<IEnumerable<PlantResponseDto>> GetUserPlantsAsync(
             Guid userId,
+            string? search = null,
             CancellationToken cancellationToken = default)
         {
+            if (search is not null && search.Trim().Length > TextSearch.MaxQueryLength)
+            {
+                throw new ValidationException($"Search text must be {TextSearch.MaxQueryLength} characters or fewer.");
+            }
+
             var plants = await _plantRepository.GetByUserIdAsync(userId, cancellationToken);
 
-            return plants.Select(MapToResponseDto);
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                return plants.Select(MapToResponseDto).ToList();
+            }
+
+            return plants
+                .Select(p => new
+                {
+                    Plant = p,
+                    Score = TextSearch.Score(search, p.Nickname, p.PlantType?.NameEn, p.PlantType?.NameAr)
+                })
+                .Where(x => x.Score > 0)
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.Plant.AddedAt)
+                .Select(x => MapToResponseDto(x.Plant))
+                .ToList();
         }
 
         // عرض نبتة واحدة (لازم تكون تبع المستخدم)

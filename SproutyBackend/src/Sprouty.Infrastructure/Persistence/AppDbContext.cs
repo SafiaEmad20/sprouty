@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Sprouty.Domain.Entities;
+using Sprouty.Infrastructure.Persistence.Converters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +18,13 @@ namespace Sprouty.Infrastructure.Persistence
         public DbSet<PlantStatusRecord> PlantStatuses => Set<PlantStatusRecord>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+
+        // Every DateTime / DateTime? column is read back as UTC, so the API always sends "...Z".
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+            configurationBuilder.Properties<DateTime?>().HaveConversion<UtcDateTimeConverter>();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

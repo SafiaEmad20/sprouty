@@ -10,5 +10,8 @@ namespace Sprouty.Application.Interfaces
         Task<IEnumerable<PlantTypeResponseDto>> GetAllAsync( CancellationToken cancellationToken = default);
 
         Task<PlantTypeResponseDto?> GetByIdAsync( Guid id, CancellationToken cancellationToken = default);
+
+        // Search by English or Arabic name (and category), best matches first. Tolerates small typos.
+        Task<IEnumerable<PlantTypeResponseDto>> SearchAsync(string? query, CancellationToken cancellationToken = default);
     }
 }

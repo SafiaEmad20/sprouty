@@ -148,6 +148,7 @@ Right-click **Sprouty.Api** → **Manage User Secrets**, then paste:
 
 - `Jwt:Key` is **required**: the API will not start without it.
 - `EmailSettings` is needed only to send password reset emails. Everything else works without it.
+- `Frontend:BaseUrl` in `appsettings.json` (default `http://localhost:4200`) is the address used in the password reset link. Change it when the frontend runs elsewhere.
 
 ### 4. Create the database
 
@@ -196,21 +197,22 @@ Run the **https** profile from Visual Studio (or press **Ctrl + F5** to run with
 |---|---|---|
 | POST | `/register` | Create an account (`name`, `email`, `password` with at least 8 characters). Returns a JWT. |
 | POST | `/login` | Log in. Returns a JWT (valid for 60 minutes). |
-| POST | `/forgot-password` | Sends a reset link by email (valid for 15 minutes). Always returns the same message, so it does not reveal whether the email exists. |
-| POST | `/reset-password` | Sets a new password (`email`, `token`, `newPassword`, `confirmPassword`). |
+| POST | `/forgot-password` | Sends a reset link by email (valid for 15 minutes, single use). The link opens the frontend page `{Frontend:BaseUrl}/reset-password?token=…&email=…`. Always returns the same message, so it does not reveal whether the email exists. |
+| POST | `/reset-password` | Sets a new password (`email`, `token`, `newPassword`, `confirmPassword`). An invalid, expired or already used token returns **400**. |
 
 ### Plant Types: `/api/plant-types`
 
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/` | All plant types with their ideal ranges. |
+| GET | `/search?q=min` | Search by English or Arabic name (or category from 3 letters), best matches first. Works from the first letter and forgives a small typo (`mnit` → Mint, `نعنع` → نعناع). Ignores Arabic diacritics and أ/إ/آ, ة/ه, ى/ي differences. No `q` returns all types. |
 | GET | `/{id}` | One plant type. |
 
 ### Plants 🔒: `/api/plants`
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/` | The current user's plants, newest first. |
+| GET | `/?search=min` | The current user's plants, newest first. Optional `search` filters by nickname or plant type name with the same smart matching as plant type search. |
 | GET | `/{id}` | One plant. |
 | POST | `/` | Add a plant (`plantTypeId`, `nickname`, optional `imageUrl`). A sensor is created for it automatically. Returns **201**. |
 | PUT | `/{id}` | Update a plant. **Changing the plant type clears the plant's old readings, status history and notifications** so the plant starts fresh with the new type's ranges. Changing only the name or image keeps all data. |
@@ -224,9 +226,9 @@ Validation: `nickname` is required (1–100 characters). `imageUrl` is optional;
 |---|---|---|
 | GET | `/readings?limit=100` | Reading history, oldest → newest (`limit` from 1 to 1000, default 100). |
 | GET | `/latest` | Latest reading, the plant type's ideal ranges, and the latest computed status. |
-| POST | `/readings` | Add a reading (`moisture`, `temperature`, `humidity`, `light`). It is saved on the plant's **active** sensor, the plant status is computed, and a notification is created if needed. Returns **201** with the reading and status. |
+| POST | `/readings` | Add a reading (`moisture`, `temperature`, `humidity`, `light`, **all four required**). It is saved on the plant's **active** sensor, the plant status is computed, and a notification is created if needed. Returns **201** with the reading and status. |
 
-Reading ranges: moisture and humidity 0–100 (%), temperature −40 to 85 (°C), light 0–4095 (raw LDR value, converted to a percentage for evaluation).
+Reading ranges: moisture and humidity 0–100 (%), temperature −40 to 85 (°C), light 0–4095 (raw LDR value, higher = darker). A missing value returns **400**. Every reading in a response also has `lightLevel`: the light as a percentage (0 = dark, 100 = bright), the same unit as the plant type's `minLight`/`maxLight`. All dates are UTC and end with `Z`.
 
 ### Notifications 🔒: `/api/notifications`
 
@@ -247,7 +249,7 @@ Reading ranges: moisture and humidity 0–100 (%), temperature −40 to 85 (°C)
 
 ### Plant Status Values
 
-Statuses are returned as numbers:
+Statuses are returned as names (for example `"status": "NeedsWater"`):
 
 | Value | Status | Meaning |
 |---|---|---|
@@ -265,11 +267,13 @@ A notification is created only when the status **changes** to one that needs att
 
 ### Error Responses
 
-All handled errors return JSON in the same shape:
+Errors from the business rules return:
 
 ```json
 { "title": "Bad Request", "status": 400, "detail": "Image URL must be a valid link that starts with http:// or https://." }
 ```
+
+Missing or invalid fields (model validation) return the standard ASP.NET shape with an `errors` object, for example `{ "status": 400, "errors": { "Humidity": ["Humidity is required."] } }`.
 
 | Status | When |
 |---|---|
@@ -292,7 +296,9 @@ All handled errors return JSON in the same shape:
 - [x] Sensor reading ingestion and plant health evaluation
 - [x] Reading history and latest reading endpoints
 - [x] Notifications (list, unread count, mark read, mark all read, delete)
+- [x] Smart plant search (Arabic and English, typo tolerant)
 - [x] Centralized exception handling with consistent error responses
+- [x] CORS policy for the frontend, UTC dates, enums as names
 - [x] Swagger UI with JWT support
 - [x] All endpoints tested manually in Swagger, including invalid inputs and unauthorized access
 
@@ -303,9 +309,8 @@ All handled errors return JSON in the same shape:
 - **Sensor offline detection:** sensors are not yet marked `Offline` automatically, and the device endpoints (`/api/sensors`) are not yet protected by a device key.
 - **Status history endpoint:** statuses are stored but not yet exposed through an endpoint.
 - **Plant images:** an image upload endpoint is planned; today `imageUrl` accepts links only.
-- **Password reset page:** the reset link in the email points to the API; a frontend reset page is planned.
 - **Plant type care details** (care notes, care steps, sun schedule) and **admin management** endpoints are planned.
-- **CORS** will be configured for deployment. Locally, the Angular dev server proxies `/api` to `https://localhost:7092`, so CORS is not needed.
+- **CORS:** allowed origins are set in `appsettings.json` → `Cors:AllowedOrigins` (default `http://localhost:4200`); add the deployed frontend address there. Locally the Angular dev server proxies `/api`, so CORS is not needed in development.
 
 ---
 

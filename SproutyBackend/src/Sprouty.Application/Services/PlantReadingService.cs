@@ -1,3 +1,4 @@
+using Sprouty.Application.Common;
 using Sprouty.Application.DTOs.PlantTypes;
 using Sprouty.Application.DTOs.Readings;
 using Sprouty.Application.DTOs.Sensors;
@@ -139,6 +140,7 @@ namespace Sprouty.Application.Services
                 Temperature = reading.Temperature,
                 Humidity = reading.Humidity,
                 Light = reading.Light,
+                LightLevel = LightLevel.ForDisplay(reading.Light),
                 RecordedAt = reading.RecordedAt
             };
         }

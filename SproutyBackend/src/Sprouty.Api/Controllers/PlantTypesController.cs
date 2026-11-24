@@ -25,6 +25,18 @@ namespace Sprouty.Api.Controllers
             return Ok(plantTypes);
         }
 
+        // GET /api/plant-types/search?q=min
+        // بحث بالاسم وانت بتكتب: من أول حرف، عربي وإنجليزي، وبيستحمل غلطة صغيرة.
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(
+            [FromQuery] string? q,
+            CancellationToken cancellationToken)
+        {
+            var plantTypes = await _plantTypeService.SearchAsync(q, cancellationToken);
+
+            return Ok(plantTypes);
+        }
+
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
