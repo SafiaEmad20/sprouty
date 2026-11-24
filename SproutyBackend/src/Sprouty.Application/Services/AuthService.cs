@@ -113,6 +113,8 @@ namespace Sprouty.Application.Services
                 CreatedAt = DateTime.UtcNow
             };
 
+            // أي لينك قديم لسه ماتستخدمش بيتلغي، فآخر إيميل بس هو اللي يشتغل.
+            await _userRepository.InvalidateResetTokensAsync(user.Id, cancellationToken);
             await _userRepository.AddResetTokenAsync(resetToken, cancellationToken);
             await _userRepository.SaveChangesAsync(cancellationToken);
 
@@ -120,7 +122,16 @@ namespace Sprouty.Application.Services
             // اللينك بيفتح صفحة Reset Password في الفرونت (Frontend:BaseUrl)، مش الـAPI.
             string resetLink = _linkBuilder.PasswordResetLink(rawToken, user.Email);
 
-            await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink, cancellationToken);
+            try
+            {
+                await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink, cancellationToken);
+            }
+            catch (Exception)
+            {
+                // لو الإيميل فشل يتبعت، الرد بيفضل نفس الـ200 اللي بيرجع لأي إيميل،
+                // عشان محدش يعرف من الـ500 إن الإيميل متسجل. سبب الفشل بيتكتب في الـconsole
+                // من EmailService ("[SMTP Error]").
+            }
         }
 
         //  منطق Reset Password

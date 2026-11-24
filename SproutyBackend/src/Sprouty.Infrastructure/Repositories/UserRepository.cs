@@ -31,6 +31,11 @@ namespace Sprouty.Infrastructure.Repositories
                 .AnyAsync(u => u.Email == normalizedEmail, cancellationToken);
         }
 
+        public async Task<bool> ExistsAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Users.AnyAsync(u => u.Id == userId, cancellationToken);
+        }
+
         public async Task AddAsync(User user, CancellationToken cancellationToken = default)
         {
             await _context.Users.AddAsync(user, cancellationToken);
@@ -46,6 +51,19 @@ namespace Sprouty.Infrastructure.Repositories
             return await _context.PasswordResetTokens
                 .Include(t => t.User) // ضروري جداً لجلب المستخدم مع التوكن
                 .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
+        }
+
+        public async Task InvalidateResetTokensAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var unusedTokens = await _context.PasswordResetTokens
+                .Where(t => t.UserId == userId && t.UsedAt == null)
+                .ToListAsync(cancellationToken);
+
+            var now = DateTime.UtcNow;
+            foreach (var token in unusedTokens)
+            {
+                token.UsedAt = now;
+            }
         }
 
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)

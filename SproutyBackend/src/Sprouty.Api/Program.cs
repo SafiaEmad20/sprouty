@@ -123,6 +123,10 @@ namespace Sprouty.Api
             app.UseCors(FrontendCorsPolicy);
 
             app.UseAuthentication();
+
+            // A valid token whose user no longer exists gets 401 (not a 500 later on).
+            app.UseMiddleware<UserExistsMiddleware>();
+
             app.UseAuthorization();
 
 
