@@ -14,17 +14,20 @@ namespace Sprouty.Application.Services
         private readonly IPasswordHasherService _passwordHasher;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IEmailService _emailService;
+        private readonly IAppLinkBuilder _linkBuilder;
 
         public AuthService(
             IUserRepository userRepository,
             IPasswordHasherService passwordHasher,
             IJwtTokenService jwtTokenService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IAppLinkBuilder linkBuilder)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _jwtTokenService = jwtTokenService;
             _emailService = emailService;
+            _linkBuilder = linkBuilder;
         }
 
         public async Task<AuthResponse> RegisterAsync(
@@ -110,13 +113,25 @@ namespace Sprouty.Application.Services
                 CreatedAt = DateTime.UtcNow
             };
 
+            // أي لينك قديم لسه ماتستخدمش بيتلغي، فآخر إيميل بس هو اللي يشتغل.
+            await _userRepository.InvalidateResetTokensAsync(user.Id, cancellationToken);
             await _userRepository.AddResetTokenAsync(resetToken, cancellationToken);
             await _userRepository.SaveChangesAsync(cancellationToken);
 
             // رابط إعادة التعيين
-            string resetLink = $"https://localhost:7092/api/auth/reset-password?token={rawToken}&email={Uri.EscapeDataString(user.Email)}";
+            // اللينك بيفتح صفحة Reset Password في الفرونت (Frontend:BaseUrl)، مش الـAPI.
+            string resetLink = _linkBuilder.PasswordResetLink(rawToken, user.Email);
 
-            await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink, cancellationToken);
+            try
+            {
+                await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink, cancellationToken);
+            }
+            catch (Exception)
+            {
+                // لو الإيميل فشل يتبعت، الرد بيفضل نفس الـ200 اللي بيرجع لأي إيميل،
+                // عشان محدش يعرف من الـ500 إن الإيميل متسجل. سبب الفشل بيتكتب في الـconsole
+                // من EmailService ("[SMTP Error]").
+            }
         }
 
         //  منطق Reset Password
@@ -134,7 +149,7 @@ namespace Sprouty.Application.Services
                 resetToken.UsedAt != null ||
                 resetToken.ExpiresAt < DateTime.UtcNow)
             {
-                throw new InvalidOperationException("Invalid or expired password reset token.");
+                throw new ValidationException("Invalid or expired password reset token.");
             }
 
             // تشفير وتحديث كلمة المرور الجديدة

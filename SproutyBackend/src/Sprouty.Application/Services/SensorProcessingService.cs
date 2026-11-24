@@ -1,4 +1,5 @@
 ﻿
+using Sprouty.Application.Common;
 using Sprouty.Application.DTOs.Readings;
 using Sprouty.Application.DTOs.Sensors;
 using Sprouty.Application.Interfaces;
@@ -36,34 +37,43 @@ namespace Sprouty.Application.Services
             if (sensor.Status == SensorStatus.Offline)
                 throw new SensorOfflineException("Sensor is offline.");
 
-            if (!double.IsFinite(request.Moisture) ||
-                !double.IsFinite(request.Temperature) ||
-                !double.IsFinite(request.Humidity) ||
-                !double.IsFinite(request.Light))
+            // The controller already rejects missing values (400); this also protects other callers.
+            if (request.Moisture is not double moisture ||
+                request.Temperature is not double temperature ||
+                request.Humidity is not double humidity ||
+                request.Light is not double light)
+            {
+                throw new ValidationException("Moisture, temperature, humidity and light are all required.");
+            }
+
+            if (!double.IsFinite(moisture) ||
+                !double.IsFinite(temperature) ||
+                !double.IsFinite(humidity) ||
+                !double.IsFinite(light))
             {
                 throw new ValidationException("Sensor readings must contain valid finite numbers.");
             }
 
-            if (request.Moisture < 0 || request.Moisture > 100)
+            if (moisture < 0 || moisture > 100)
                 throw new ValidationException("Moisture must be between 0 and 100.");
 
-            if (request.Humidity < 0 || request.Humidity > 100)
+            if (humidity < 0 || humidity > 100)
                 throw new ValidationException("Humidity must be between 0 and 100.");
 
-            if (request.Temperature < -40 || request.Temperature > 85)
+            if (temperature < -40 || temperature > 85)
                 throw new ValidationException("Temperature must be between -40 and 85.");
 
-            if (request.Light < 0 || request.Light > 4095)
+            if (light < 0 || light > 4095)
                 throw new ValidationException("Light must be between 0 and 4095.");
 
             var reading = new SensorReading
             {
                 Id = Guid.NewGuid(),
                 SensorId = sensorId,
-                Moisture = request.Moisture,
-                Temperature = request.Temperature,
-                Humidity = request.Humidity,
-                Light = request.Light,
+                Moisture = moisture,
+                Temperature = temperature,
+                Humidity = humidity,
+                Light = light,
                 RecordedAt = DateTime.UtcNow
             };
 
@@ -77,6 +87,7 @@ namespace Sprouty.Application.Services
                 Temperature = reading.Temperature,
                 Humidity = reading.Humidity,
                 Light = reading.Light,
+                LightLevel = LightLevel.ForDisplay(reading.Light),
                 RecordedAt = reading.RecordedAt
             };
         }
@@ -114,7 +125,7 @@ namespace Sprouty.Application.Services
                 }
 
                 // Convert the raw LDR reading to relative light percentage.
-                var lightLevel = ToLightLevel(reading.Light);
+                var lightLevel = LightLevel.FromRaw(reading.Light);
 
                 if (reading.Moisture < requirement.MinMoisture)
                 {
@@ -193,14 +204,6 @@ namespace Sprouty.Application.Services
 
 
         }
-
-        private static double ToLightLevel(double rawLight)
-        {
-            var level = (4095.0 - rawLight) / 4095.0 * 100.0;
-
-            return Math.Clamp(level, 0.0, 100.0);
-        }
-
 
         private static bool IsProblemStatus(PlantStatus status)
         {

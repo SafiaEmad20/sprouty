@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IPlantRepository, PlantRepository>();
         services.AddScoped<IPlantReadingRepository, PlantReadingRepository>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddSingleton<IAppLinkBuilder, AppLinkBuilder>();
         return services;
     }
 }

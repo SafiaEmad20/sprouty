@@ -24,11 +24,13 @@ namespace Sprouty.Api.Controllers
 
         // عرض نباتات المستخدم الحالي
         [HttpGet]
+        // GET /api/plants?search=min  → filters by nickname or plant type (optional).
         public async Task<ActionResult<IEnumerable<PlantResponseDto>>> GetMyPlants(
+            [FromQuery] string? search,
             CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            var plants = await _plantService.GetUserPlantsAsync(userId, cancellationToken);
+            var plants = await _plantService.GetUserPlantsAsync(userId, search, cancellationToken);
             return Ok(plants);
         }
 

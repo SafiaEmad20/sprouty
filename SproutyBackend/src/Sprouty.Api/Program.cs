@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -15,17 +14,37 @@ using System.Text;
 using Sprouty.Api.BackgroundServices;
 using Sprouty.Infrastructure.Services;
 
+using System.Text.Json.Serialization;
 namespace Sprouty.Api
 {
     public class Program
     {
+        private const string FrontendCorsPolicy = "Frontend";
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            // Enums are sent as names ("NeedsWater"), not numbers (2).
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+            // Swagger/OpenAPI reads these options, so it also shows enums as names.
+            builder.Services.ConfigureHttpJsonOptions(options =>
+                options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+            // CORS: lets a deployed frontend on another address call the API.
+            // In development the Angular proxy is used, so this is only needed after deployment.
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                                 ?? new[] { "http://localhost:4200" };
+            builder.Services.AddCors(options =>
+                options.AddPolicy(FrontendCorsPolicy, policy => policy
+                    .WithOrigins(allowedOrigins)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()));
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi(options =>
             {
@@ -110,7 +129,13 @@ namespace Sprouty.Api
 
             app.UseHttpsRedirection();
 
+            app.UseCors(FrontendCorsPolicy);
+
             app.UseAuthentication();
+
+            // A valid token whose user no longer exists gets 401 (not a 500 later on).
+            app.UseMiddleware<UserExistsMiddleware>();
+
             app.UseAuthorization();
 
 

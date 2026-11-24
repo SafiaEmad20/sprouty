@@ -8,7 +8,8 @@ namespace Sprouty.Application.Interfaces
 {
     public interface IPlantService
     {
-        Task<IEnumerable<PlantResponseDto>> GetUserPlantsAsync(Guid userId, CancellationToken cancellationToken = default);
+        // search (optional): filters by nickname or plant type name, best matches first.
+        Task<IEnumerable<PlantResponseDto>> GetUserPlantsAsync(Guid userId, string? search = null, CancellationToken cancellationToken = default);
 
         Task<PlantResponseDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
 
