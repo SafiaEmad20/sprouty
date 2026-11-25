@@ -64,6 +64,8 @@ namespace Sprouty.Api
             builder.Services.AddSingleton<ISensorReadingStore, InMemorySensorReadingStore>();
             builder.Services.AddHostedService<SerialSensorReaderService>();
 
+            builder.Services.AddHostedService<SerialReadingPersistenceService>();
+
 
 
             builder.Services.AddScoped<IAuthService, AuthService>();
