@@ -1,25 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NotificationsService } from '../services/notifications.service';
 
-@Component({
-  selector: 'app-notifications',
-  imports: [DatePipe, RouterLink],
-  template: `
-  <div class="container"><h1>Alerts</h1>
-    @if (n.unread() > 0) { <button class="btn ghost" (click)="n.markAllRead()">Mark all as read</button> }
-    <div class="list">
-      @for (x of n.items(); track x.id) {
-        <div class="card row" [class.unread]="!x.isRead">
-          <div><b>{{ x.title }}</b><p>{{ x.message }}</p><span class="muted">{{ x.createdAt | date:'medium' }}</span></div>
-          <div>
-            <a class="btn ghost" [routerLink]="['/dashboard', x.plantId]" (click)="n.markRead(x.id)">View plant</a>
-            @if (!x.isRead) { <button class="btn" (click)="n.markRead(x.id)">Mark as read</button> }
-          </div>
-        </div>
-      } @empty { <p class="muted">No alerts yet. We'll tell you when a plant needs attention.</p> }
-    </div></div>`,
-  styles: [`.list{display:grid;gap:.8rem;margin-top:1rem}.row{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}.unread{border-left:6px solid var(--accent)}`],
+@Component({ selector:'app-notifications', imports:[DatePipe,RouterLink], template:`
+  <div class="container notifications-page"><div class="section-heading"><div><p class="eyebrow">A LITTLE NOTE FROM YOUR PLANTS</p><h1>Notifications</h1><p class="muted">The little things your garden wants you to know.</p></div>@if(n.unread()>0){<button class="btn-outline" (click)="n.markAllRead()">Mark all as read</button>}</div>
+    <div class="tabs notification-tabs"><button [class.selected]="filter()==='All'" (click)="filter.set('All')">All</button><button [class.selected]="filter()==='Needs attention'" (click)="filter.set('Needs attention')">Needs attention</button><button [class.selected]="filter()==='Happy updates'" (click)="filter.set('Happy updates')">Happy updates</button></div>
+    <div class="notification-list">@for(x of filtered();track x.id){<article class="card notification-item" [class.unread]="!x.isRead"><div class="notification-icon" [class.alert]="x.type==='NeedsAttention'" [class.offline]="x.type==='SensorOffline'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8c0 5 3 8 7 8s7-3 7-8"/></svg></div><div class="notification-copy"><div class="notification-title"><b>{{x.title || x.plantNickname || 'A note from your garden'}}</b>@if(!x.isRead){<span class="unread-dot"></span>}</div><p>{{x.message}}</p><small>{{x.createdAt | date:'medium'}}</small></div><div class="notification-actions">@if(x.plantId){<a [routerLink]="['/dashboard',x.plantId]" (click)="n.markRead(x.id)">View plant</a>}<button class="icon-button" (click)="n.delete(x.id)" aria-label="Delete notification">×</button></div></article>} @empty {<div class="card no-data"><div class="empty-photo"><img src="https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=700&q=80" alt="Sunlit green leaves"></div><h2>All quiet in your garden</h2><p class="muted">When your plants have something to tell you, you'll find it here.</p></div>}</div>
+  </div>`,
 })
-export class Notifications { n = inject(NotificationsService); constructor() { this.n.load(); } }
+export class Notifications { n=inject(NotificationsService); filter=signal('All'); constructor(){this.n.load();} filtered(){return this.n.items().filter(x=>this.filter()==='All'||(this.filter()==='Needs attention'&&x.type!=='Info')||(this.filter()==='Happy updates'&&x.type==='Info'));} }
