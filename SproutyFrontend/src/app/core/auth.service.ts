@@ -36,6 +36,12 @@ export class AuthService {
     return req$.pipe(tap(r => this.save(r)));
   }
 
+  forgotPassword(email: string) { return this.http.post<{ message: string }>(`${API_URL}/auth/forgot-password`, { email }); }
+
+  resetPassword(email: string, token: string, newPassword: string, confirmPassword: string) {
+    return this.http.post<{ message: string }>(`${API_URL}/auth/reset-password`, { email, token, newPassword, confirmPassword });
+  }
+
   logout() {
     ['token', 'user', 'expiresAt'].forEach(k => localStorage.removeItem(k));
     this.user.set(null);

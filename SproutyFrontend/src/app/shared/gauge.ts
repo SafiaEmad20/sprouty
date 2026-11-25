@@ -16,8 +16,8 @@ import { Component, computed, input } from '@angular/core';
   styles: [`
     .g{padding:1rem} .top{display:flex;justify-content:space-between;align-items:center;font-weight:700}
     .val{font:700 2.4rem var(--font-head)} small{font-size:1rem;color:var(--muted);margin-left:.15rem}
-    .track{position:relative;height:12px;background:#EDE8C2;border-radius:99px;margin:.4rem 0}
-    .ideal{position:absolute;top:0;bottom:0;background:#C9D6B4;border-radius:99px}
+    .track{position:relative;height:12px;background:var(--surface-soft);border-radius:99px;margin:.4rem 0}
+    .ideal{position:absolute;top:0;bottom:0;background:var(--surface-sage);border-radius:99px}
     .marker{position:absolute;top:-4px;width:6px;height:20px;border-radius:3px;background:var(--ink);transform:translateX(-50%);transition:left .6s}
     .range{font-size:.85rem}
   `],
