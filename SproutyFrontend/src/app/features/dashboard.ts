@@ -1,74 +1,34 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { switchMap, timer } from 'rxjs';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { catchError, of, switchMap, timer } from 'rxjs';
 import { PlantsService } from '../services/plants.service';
 import { LatestReading, Plant, PlantType, SensorReading } from '../models';
 import { statusTone } from '../core/status';
+import { apiErrorMessage } from '../core/api-error';
 import { Gauge } from '../shared/gauge';
 import { HistoryChart } from '../shared/history-chart';
 
 type Metric = 'moisture' | 'temperature' | 'light';
-
-@Component({
-  selector: 'app-dashboard',
-  imports: [Gauge, HistoryChart, RouterLink, DatePipe],
-  template: `
-  <div class="container">
-    <a routerLink="/my-plants">← My plants</a>
-    @if (notFound()) { <p class="card">We couldn't find this plant. <a routerLink="/my-plants">Back to My plants</a></p> }
-    @if (plant(); as p) {
-      <h1>@if (p.imageUrl) { <img class="avatar" [src]="p.imageUrl" alt=""> } @else { <span>{{ type()?.emoji }}</span> } {{ p.nickname }}</h1>
-    }
-    @if (latest(); as l) {
-      <div class="bubble" [class.bad]="isBad(l)">
-        <p class="say">“{{ l.status.message }}”</p>
-        <span class="muted">Updated {{ l.reading.recordedAt | date:'mediumTime' }} · refreshes every 15 seconds</span>
-      </div>
-      @if (type(); as t) { <p class="card sun">☀️ <b>Sun schedule:</b> {{ t.sunSchedule }}</p> }
-      <div class="grid g4">
-        <app-gauge label="Soil moisture" icon="💧" [value]="l.reading.moisture" [min]="l.requirement.minMoisture" [max]="l.requirement.maxMoisture"/>
-        <app-gauge label="Temperature" icon="🌡️" unit="°C" [value]="l.reading.temperature" [min]="l.requirement.minTemperature" [max]="l.requirement.maxTemperature" [scaleMin]="0" [scaleMax]="50"/>
-        <app-gauge label="Light" icon="🔆" [value]="l.reading.light" [min]="l.requirement.minLight" [max]="l.requirement.maxLight"/>
-      </div>
-      <div class="card hist">
-        <div class="tabs">
-          @for (m of metrics; track m.key) { <button class="btn" [class.ghost]="metric() !== m.key" (click)="metric.set(m.key)">{{ m.label }}</button> }
-        </div>
-        <app-history-chart [data]="history()" [metric]="metric()" [label]="metric()" [min]="range(l).min" [max]="range(l).max"/>
-      </div>
-      <p><a class="btn ghost" [routerLink]="['/readings', plant()?.id]">Enter a reading manually</a></p>
-    } @else { <p class="muted">Loading readings…</p> }
+@Component({ selector: 'app-dashboard', imports: [Gauge, HistoryChart, RouterLink, DatePipe], template: `
+  <div class="container dashboard-page"><a routerLink="/my-plants" class="back-link">← My plants</a>
+    @if(notFound()){<div class="card"><h2>We couldn't find this plant.</h2><a routerLink="/my-plants">Back to My Plants</a></div>}
+    @if(plant(); as p){<div class="plant-hero card"><div class="plant-hero-image">@if(p.imageUrl || type()?.imageUrl){<img [src]="p.imageUrl || type()?.imageUrl" [alt]="p.nickname">} @else {<img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=900&q=85" [alt]="p.nickname">}</div><div class="plant-hero-copy"><p class="eyebrow">YOUR GREEN FAMILY</p><h1>{{p.nickname}}</h1><p class="muted">{{type()?.nameEn}} · Added {{p.addedAt | date:'mediumDate'}}</p>@if(latest();as l){<span class="status-pill" [class.healthy]="l.status.statusType==='Healthy'" [class.attention]="l.status.statusType!=='Healthy' && l.status.statusType!=='NoData'">{{statusLabel(l.status.statusType)}}</span><p class="plant-voice">“{{l.status.message}}”</p>}</div><div class="plant-actions"><a class="btn-outline" [routerLink]="['/edit-plant',p.id]">Edit plant</a><a class="btn-primary" [routerLink]="['/readings',p.id]">＋ Add reading</a><button class="btn-outline" (click)="deletePlant()">Delete</button></div><small class="sensor-id">Sensor ID: {{p.sensorId || 'Not available'}}</small></div>}
+    @if(latest();as l){@if(l.reading && l.requirement){<div class="metric-grid"><app-gauge label="Soil moisture" icon="M" [value]="l.reading.moisture" [min]="l.requirement.minMoisture" [max]="l.requirement.maxMoisture"/><app-gauge label="Temperature" icon="°" unit="°C" [value]="l.reading.temperature" [min]="l.requirement.minTemperature" [max]="l.requirement.maxTemperature" [scaleMin]="0" [scaleMax]="50"/><app-gauge label="Air humidity" icon="H" [value]="l.reading.humidity" [min]="l.requirement.minHumidity" [max]="l.requirement.maxHumidity"/><app-gauge label="Light level" icon="L" [value]="l.reading.light" [min]="l.requirement.minLight" [max]="l.requirement.maxLight"/></div><div class="card chart-card"><div class="section-heading"><div><p class="eyebrow">GROWTH OVER TIME</p><h2>Your plant's history</h2></div><div class="tabs">@for(m of metrics;track m.key){<button [class.selected]="metric()===m.key" (click)="metric.set(m.key)">{{m.label}}</button>}</div></div><app-history-chart [data]="history()" [metric]="metric()" [label]="metric()" [min]="range(l).min" [max]="range(l).max"/></div>} @else {<div class="card no-data"><div class="empty-photo"><img src="https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=700&q=80" alt="Sunlit green houseplants"></div><h2>I'm waiting for my first reading.</h2><p class="muted">Once your sensor sends its first update, your plant's health will appear here.</p><a class="btn-primary" [routerLink]="['/readings',plant()?.id]">Add a manual reading</a></div>}}
+    @if(error()){<p class="error">{{error()}}</p>}
   </div>`,
-  styles: [`
-    .bubble{background:#E3EBCF;border-radius:24px 24px 24px 4px;padding:1rem 1.4rem;margin:1rem 0;max-width:640px}
-    .bubble.bad{background:#FCEFC8}.say{font:700 1.6rem var(--font-head);margin:0 0 .2rem}
-    .sun{margin:1rem 0}.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-    .hist{margin-top:1rem}.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
-  `],
 })
 export class Dashboard {
-  private svc = inject(PlantsService);
-  private id = inject(ActivatedRoute).snapshot.params['id'];
-  notFound = signal(false);
-  isBad(l: LatestReading) { return statusTone(l.status.statusType) === 'bad'; }
-  plant = signal<Plant | null>(null); type = signal<PlantType | null>(null);
-  latest = signal<LatestReading | null>(null); history = signal<SensorReading[]>([]); metric = signal<Metric>('moisture');
-  metrics: { key: Metric; label: string }[] = [
-    { key: 'moisture', label: 'Moisture' }, { key: 'temperature', label: 'Temperature' }, { key: 'light', label: 'Light' }];
-
-  constructor() {
-    this.svc.getPlant(this.id).subscribe({
-      next: p => { this.plant.set(p); this.svc.getPlantType(p.plantTypeId).subscribe(r => this.type.set(r.type)); },
-      error: () => this.notFound.set(true),
-    });
-    this.svc.getReadings(this.id).subscribe(r => this.history.set(r));
-    // Live updates: polling now; replace with SignalR later if time allows.
-    timer(0, 15000).pipe(switchMap(() => this.svc.getLatest(this.id)), takeUntilDestroyed(inject(DestroyRef))).subscribe(l => this.latest.set(l));
+  private svc = inject(PlantsService); private id = inject(ActivatedRoute).snapshot.params['id']; private destroyRef = inject(DestroyRef); private router = inject(Router);
+  notFound = signal(false); error = signal(''); plant = signal<Plant|null>(null); type = signal<PlantType|null>(null); latest = signal<LatestReading|null>(null); history = signal<SensorReading[]>([]); metric = signal<Metric>('moisture');
+  metrics: {key:Metric;label:string}[] = [{key:'moisture',label:'Moisture'},{key:'temperature',label:'Temperature'},{key:'light',label:'Light'}];
+  constructor(){
+    this.svc.getPlant(this.id).subscribe({next:p=>{this.plant.set(p);this.svc.getPlantType(p.plantTypeId).subscribe({next:r=>this.type.set(r.type),error:e=>this.error.set(apiErrorMessage(e))});},error:()=>this.notFound.set(true)});
+    this.svc.getReadings(this.id).subscribe({next:r=>this.history.set(r),error:e=>this.error.set(apiErrorMessage(e,'Could not load reading history.'))});
+    timer(0,15000).pipe(switchMap(()=>this.svc.getLatest(this.id).pipe(catchError(e=>{this.error.set(apiErrorMessage(e,'Live readings are temporarily unavailable.'));return of(null);}))),takeUntilDestroyed(this.destroyRef)).subscribe(l=>{if(l)this.latest.set(l);});
   }
-  range(l: LatestReading) {
-    const q = l.requirement, m = this.metric();
-    return { min: q[('min' + m[0].toUpperCase() + m.slice(1)) as keyof typeof q] as number, max: q[('max' + m[0].toUpperCase() + m.slice(1)) as keyof typeof q] as number };
-  }
+  statusLabel(s:string){return s==='Healthy'?'Looking good':s==='NoData'?'Waiting for data':'Needs a little love';}
+  deletePlant(){const p=this.plant();if(!p||!confirm(`Delete ${p.nickname} and its history?`))return;this.svc.deletePlant(p.id).subscribe({next:()=>this.router.navigate(['/my-plants']),error:e=>this.error.set(apiErrorMessage(e,'Could not delete this plant.'))});}
+  range(l:LatestReading){const q=l.requirement!;const m=this.metric();return {min:q[('min'+m[0].toUpperCase()+m.slice(1)) as keyof typeof q] as number,max:q[('max'+m[0].toUpperCase()+m.slice(1)) as keyof typeof q] as number};}
 }

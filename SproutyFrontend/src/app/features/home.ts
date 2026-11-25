@@ -1,90 +1,254 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
-import { Reveal } from '../shared/reveal';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, Reveal],
+  imports: [RouterLink],
   template: `
-  <section class="hero">
-    <span class="leaf l1" aria-hidden="true">🍃</span><span class="leaf l2" aria-hidden="true">🌿</span><span class="leaf l3" aria-hidden="true">🍃</span>
-    <div class="hero-in">
-      <div class="copy">
-        <p class="eyebrow">From seed to need</p>
-        <h1>Your plants can finally tell you what they need.</h1>
-        <p class="sub">Sprouty turns sensor numbers into simple, friendly messages, so you always know when to water, move or rescue your plant.</p>
-        <div class="cta">
-          <a class="btn big" [routerLink]="auth.isLoggedIn ? '/my-plants' : '/register'">{{ auth.isLoggedIn ? 'Go to my plants' : 'Get started' }}</a>
-          <button class="btn big ghost light" (click)="scrollToFeatures()">See what it can do</button>
+    <main class="home-v3">
+
+      <section class="home-hero-v3">
+        <div class="home-hero-copy">
+          <p class="eyebrow">
+            <span class="eyebrow-rule"></span>
+            A MORE THOUGHTFUL WAY TO GROW
+          </p>
+
+          <h1>
+            Know what they need.<br>
+            <em>Love how they grow.</em>
+          </h1>
+
+          <p class="home-lead">
+            A good plant day starts with understanding the little things.
+            Sprouty brings your plant care, sensor readings and gentle guidance
+            together — so caring for your green space feels simple, not like guesswork.
+          </p>
+
+          <div class="home-actions">
+            <a class="btn-primary"
+               [routerLink]="auth.isLoggedIn ? '/overview' : '/register'">
+              {{ auth.isLoggedIn ? 'Open my garden' : 'Start your garden' }}
+              <span aria-hidden="true">→</span>
+            </a>
+
+            <a class="btn-outline" href="#how-it-works">
+              Discover Sprouty
+            </a>
+          </div>
+
+          <div class="home-proof">
+            <span class="proof-mark">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19.5 4.5C11 4.8 5 8 5 14c0 3.2 2 5.5 5 5.5 6.1 0 9.3-6.3 9.5-15Z"/>
+                <path d="M4 21c3-5 6.7-8.3 11.5-11"/>
+              </svg>
+            </span>
+
+            <span>
+              <b>Care that makes sense.</b>
+              <small>Clear insights. More confident plant care.</small>
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="bubble-demo" aria-live="polite">
-        <div class="plant" aria-hidden="true">🪴</div>
-        <div class="say" [class.swap]="swap()"><span>{{ messages[i()].icon }}</span> {{ messages[i()].text }}</div>
-      </div>
-    </div>
-  </section>
 
-  <section id="features" class="features">
-    <div class="container">
-      <h2 reveal>What Sprouty can do for you</h2>
-      <div class="flist">
-        @for (f of features; track f.n; let k = $index) {
-          <div reveal [revealDelay]="k * 120"><div class="feat"><span class="num">{{ f.n }}</span><h3>{{ f.t }}</h3><p>{{ f.d }}</p></div></div>
-        }
-      </div>
-    </div>
-  </section>
+        <div class="home-hero-visual">
+          <img
+            src="https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1500&q=90"
+            alt="A sunlit indoor garden filled with lush green plants"
+          >
 
-  <section class="final container" reveal>
-    <h2>Ready to keep your plant alive?</h2>
-    <p class="muted">Pick an easy plant, add it to your list and let it talk to you.</p>
-    <a class="btn big" [routerLink]="auth.isLoggedIn ? '/plants' : '/register'">{{ auth.isLoggedIn ? 'Browse the plant library' : 'Create a free account' }}</a>
-  </section>`,
-  styles: [`
-    .hero{position:relative;overflow:hidden;color:#fff;min-height:78vh;display:grid;align-items:center;
-      background:linear-gradient(100deg,rgba(52,66,45,.88) 20%,rgba(52,66,45,.35)),url('/images/hero.jpg') center/cover,url('/images/hero.svg') center/cover,#3F5238}
-    .hero-in{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:3rem 1.2rem;display:grid;gap:2rem;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:center}
-    .eyebrow{color:var(--peach);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .5rem;animation:rise .7s both}
-    h1{font-size:clamp(2.2rem,5vw,3.6rem);animation:rise .7s .1s both}
-    .sub{font-size:1.15rem;max-width:34rem;color:#F4F1C8;animation:rise .7s .25s both}
-    .cta{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.4rem;animation:rise .7s .4s both}
-    .big{padding:.8rem 1.6rem;font-size:1.1rem}
-    .btn.light{color:#fff;border-color:#fff}.btn.light:hover{background:rgba(255,255,255,.15)}
-    .bubble-demo{display:grid;justify-items:center;gap:.5rem;animation:rise .8s .3s both}
-    .plant{font-size:7rem;animation:bob 4s ease-in-out infinite}
-    .say{background:#fff;color:var(--ink);font:700 1.3rem var(--font-head);padding:.9rem 1.4rem;border-radius:24px 24px 24px 4px;box-shadow:0 12px 30px rgba(0,0,0,.25);transition:opacity .35s,transform .35s;min-width:16rem;text-align:center}
-    .say.swap{opacity:0;transform:translateY(6px)}
-    .leaf{position:absolute;font-size:2.4rem;opacity:.7;animation:drift 9s ease-in-out infinite}
-    .l1{left:6%;top:14%}.l2{left:44%;bottom:10%;animation-delay:-3s}.l3{right:8%;top:10%;animation-delay:-6s}
-    .features{background:var(--leaf);color:#fff;padding:3.5rem 0}
-    .features h2{font-size:2rem;text-align:center;margin-bottom:2rem}
-    .flist{display:grid;gap:1.2rem;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-    .feat{height:100%;padding:1rem 1rem 1.2rem;border-top:3px solid rgba(253,251,212,.45);transition:transform .25s,border-color .25s}
-    .feat:hover{transform:translateY(-6px);border-color:var(--peach)}
-    .num{font:700 2.4rem var(--font-head);color:var(--peach)}.feat h3{font-size:1.2rem}.feat p{color:#F4F1C8;margin:0}
-    .final{text-align:center;padding-top:3rem}
-    @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-    @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-14px) rotate(2deg)}}
-    @keyframes drift{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(18px,-22px) rotate(25deg)}}
-  `],
+          <div class="floating-note note-top">
+            <span class="note-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3v18M5 8c0 5 3 8 7 8s7-3 7-8"/>
+              </svg>
+            </span>
+            <span>
+              <small>A little reminder</small>
+              <b>Every plant has its own rhythm.</b>
+            </span>
+          </div>
+
+          <div class="floating-note note-bottom">
+            <span class="health-dot"></span>
+            <span>
+              <small>Your garden, made clearer</small>
+              <b>Understand before you water.</b>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="home-statement" id="how-it-works">
+        <p class="eyebrow">PLANT CARE, WITH A LITTLE MORE CLARITY</p>
+
+        <h2>
+          Less second-guessing.<br>
+          <em>More moments of growth.</em>
+        </h2>
+
+        <p>
+          Whether you're learning the name of a new plant or checking on one
+          you've had for years, Sprouty helps turn plant-care information
+          into practical next steps.
+        </p>
+      </section>
+
+      <section class="home-steps-v3" id="features">
+
+        <article class="home-step-card">
+          <span class="step-number">01 / ADD</span>
+
+          <div class="step-art step-art-one">
+            <img
+              src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=900&q=85"
+              alt="Green plant growing in brown soil"
+            >
+          </div>
+
+          <h3>Make room for green.</h3>
+
+          <p>
+            Add a plant from the library, give it a name and make your garden feel like yours.
+          </p>
+        </article>
+
+        <article class="home-step-card">
+          <span class="step-number">02 / UNDERSTAND</span>
+
+          <div class="step-art step-art-two">
+            <img
+              src="https://images.unsplash.com/photo-1520412099551-62b6bafeb5bb?auto=format&fit=crop&w=900&q=85"
+              alt="Green bonsai tree against a dark background"
+            >
+          </div>
+
+          <h3>Listen to the little signals.</h3>
+
+          <p>
+            Keep an eye on available sensor readings and see how they compare with your plant's care needs.
+          </p>
+        </article>
+
+        <article class="home-step-card">
+          <span class="step-number">03 / CARE</span>
+
+          <div class="step-art step-art-three">
+            <img
+              src="https://plus.unsplash.com/premium_photo-1675864662842-6efc0ef31f67?auto=format&fit=crop&w=900&q=85"
+              alt="A green plant with large leaves in front of a pink wall"
+            >
+          </div>
+
+          <h3>Give care with confidence.</h3>
+
+          <p>
+            Use clear status updates and helpful guidance to decide what deserves your attention.
+          </p>
+        </article>
+
+      </section>
+
+      <section class="home-editorial-v3">
+        <div class="editorial-image">
+          <img
+            src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=90"
+            alt="Fresh green leaves in natural light"
+          >
+        </div>
+
+        <div class="editorial-copy">
+          <p class="eyebrow">A HEALTHIER RELATIONSHIP WITH YOUR PLANTS</p>
+
+          <h2>
+            Because good care<br>
+            starts with <em>noticing.</em>
+          </h2>
+
+          <p>
+            Too much water, too little light, a change in temperature —
+            small details can make a big difference. Sprouty brings the
+            information into one calm space, helping you pay attention
+            without feeling overwhelmed.
+          </p>
+
+          <a class="text-link" routerLink="/plants">
+            Find a plant to grow with →
+          </a>
+        </div>
+      </section>
+
+      <section class="home-quote-v3">
+        <span class="quote-leaf">
+          <svg viewBox="0 0 32 32">
+            <path d="M25.5 5.5C15 5.7 7.1 9.2 6.2 17.1c-.5 4.2 2.3 7.2 6.2 7.2 8.1 0 12.8-8.2 13.1-18.8Z"/>
+            <path d="M7 27c3.7-6.4 8.4-10.6 14.4-13.8"/>
+          </svg>
+        </span>
+
+        <p>
+          “You don't need a perfect green thumb.<br>
+          You just need a little curiosity, and room to grow.”
+        </p>
+
+        <small>THE SPROUTY WAY</small>
+      </section>
+
+     
+        <section class="home-final-v3">
+          <div>
+            <p class="eyebrow">YOUR NEXT LITTLE BEGINNING</p>
+
+            <h2>
+              Let's make your space<br>
+              <em>a little greener.</em>
+            </h2>
+
+            <p>
+              Start with one plant. Learn as you go. Let every small step count.
+            </p>
+
+            <a
+              class="btn-primary"
+              [routerLink]="auth.isLoggedIn ? '/overview' : '/register'"
+            >
+              {{ auth.isLoggedIn ? 'Visit my garden' : 'Create your free garden' }}
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+
+          <div class="final-image-wrapper">
+            <img
+              src="https://images.unsplash.com/photo-1747644412733-003313c88f1f?auto=format&fit=crop&w=1400&q=90"
+              alt="A beautiful potted plant in a bright and peaceful living room"
+              loading="lazy"
+            >
+          </div>
+        </section>
+
+
+      <footer class="public-footer">
+        <a class="public-brand" routerLink="/">
+          <span class="brand-symbol" aria-hidden="true">
+            <svg viewBox="0 0 32 32">
+              <path d="M25.5 5.5C15 5.7 7.1 9.2 6.2 17.1c-.5 4.2 2.3 7.2 6.2 7.2 8.1 0 12.8-8.2 13.1-18.8Z"/>
+              <path d="M7 27c3.7-6.4 8.4-10.6 14.4-13.8"/>
+            </svg>
+          </span>
+          SPROUTY
+        </a>
+
+        <span>Thoughtful plant care, one little step at a time.</span>
+
+        <a routerLink="/login">Log in</a>
+      </footer>
+
+    </main>
+  `
 })
 export class Home {
   auth = inject(AuthService);
-  messages = [
-    { icon: '💧', text: "I'm a little thirsty." }, { icon: '🌡️', text: "It's too hot for me!" },
-    { icon: '☀️', text: 'Could I get some sun?' }, { icon: '💚', text: 'I feel great, thank you!' }];
-  i = signal(0); swap = signal(false);
-  features = [
-    { n: '01', t: 'Plants that talk', d: 'No more guessing. Sprouty turns raw numbers into friendly messages like “I’m a little thirsty.”' },
-    { n: '02', t: 'Live readings', d: 'Watch soil moisture, light and temperature, compared with your plant’s ideal range.' },
-    { n: '03', t: 'Urgent alerts', d: 'Get notified the moment something needs attention, before a bad day becomes a dead plant.' },
-    { n: '04', t: 'Sun schedule', d: 'Know when to put your plant in the sun and when to take it back in.' },
-    { n: '05', t: 'Beginner guides', d: 'Simple care steps for easy herbs, succulents and flowers.' }];
-  constructor() {
-    const id = setInterval(() => { this.swap.set(true); setTimeout(() => { this.i.update(v => (v + 1) % this.messages.length); this.swap.set(false); }, 350); }, 3200);
-    inject(DestroyRef).onDestroy(() => clearInterval(id));
-  }
-  scrollToFeatures() { document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }
 }

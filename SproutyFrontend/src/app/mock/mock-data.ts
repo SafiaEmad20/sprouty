@@ -24,7 +24,7 @@ export const MOCK_PLANT_TYPES: PlantType[] = [
 ];
 
 const req = (i: number, t: string, m: [number, number], te: [number, number], l: [number, number]): PlantRequirement =>
-  ({ id: 'r' + i, plantTypeId: t, minMoisture: m[0], maxMoisture: m[1], minTemperature: te[0], maxTemperature: te[1], minLight: l[0], maxLight: l[1] });
+  ({ id: 'r' + i, plantTypeId: t, minMoisture: m[0], maxMoisture: m[1], minTemperature: te[0], maxTemperature: te[1], minHumidity: 35, maxHumidity: 75, minLight: l[0], maxLight: l[1] });
 
 export const MOCK_REQUIREMENTS: PlantRequirement[] = [
   req(1, 'pt1', [40, 70], [18, 30], [60, 90]),
@@ -48,8 +48,8 @@ export function makeReadings(plantId: string, q: PlantRequirement): SensorReadin
     id: `${plantId}-${i}`, sensorId: 's-' + plantId,
     moisture: r1(thirsty ? mMid + (q.minMoisture - 4 - mMid) * (i / 23) : mMid + Math.sin(i / 3) * half(q.minMoisture, q.maxMoisture) * 0.4),
     temperature: r1(mid(q.minTemperature, q.maxTemperature) + Math.sin(i / 4) * half(q.minTemperature, q.maxTemperature) * 0.35),
+    humidity: r1(mid(q.minHumidity, q.maxHumidity) + Math.sin(i / 5) * half(q.minHumidity, q.maxHumidity) * 0.25),
     light: r1(mid(q.minLight, q.maxLight) + Math.sin(i / 3) * half(q.minLight, q.maxLight) * 0.3),
     recordedAt: new Date(now - (23 - i) * 3600_000).toISOString(),
   }));
 }
-
