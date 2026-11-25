@@ -104,8 +104,8 @@ export class AddPlant {
   readonly photoOptions = [
     { label: 'Sunlit leaves', url: 'https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=900&q=85' },
     { label: 'Monstera', url: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=900&q=85' },
-    { label: 'Green corner', url: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=900&q=85' },
-    { label: 'Indoor garden', url: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=900&q=85' },
+    { label: 'Green corner', url: 'https://images.unsplash.com/photo-1613143323550-7a9044756070?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D' },
+    { label: 'Indoor garden', url: 'https://images.unsplash.com/photo-1612088285825-e4f098c3fc20?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D' },
   ];
 
   types = signal<PlantType[]>([]);
