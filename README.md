@@ -9,7 +9,7 @@
 | **Project Name** | SPROUTY — Smart Plant Care Companion |
 | **Program** | Digital Egypt Pioneers Initiative (DEPI) — Capstone Project |
 | **Track** | Software Development — Full Stack .NET Web Developer |
-| **Company** | YAT Learning Centers |
+| **Company** | YAT Learning |
 | **Group** | YAT849A_CAI5_SWD5_S8_DEPI5 |
 | **Instructor** | Ayed Ali Ayed |
 | **Team Members** | [6 members](#-team-members) |
@@ -43,16 +43,18 @@ The project follows **Clean Architecture** and is built with **ASP.NET Core Web 
 |---------|--------|
 | Domain Model | ✅ Completed |
 | Database Design & Migrations | ✅ Completed |
-| Angular Frontend | ✅ Completed |
 | REST API | ✅ Completed |
 | Authentication (JWT + Forgot / Reset Password) | ✅ Completed |
 | Plant Management (CRUD) | ✅ Completed |
 | Sensor Readings & Plant Health Evaluation | ✅ Completed |
 | Notifications | ✅ Completed |
-| Frontend–Backend Integration | 🚧 In Progress (connecting the latest backend features) |
-| ESP32 IoT Device | 🚧 In Progress (hardware components ready, firmware under development) |
-| IoT–Backend–Frontend Integration | 🔜 Next step |
+| Typo-Tolerant Plant Search (API) | ✅ Completed |
+| Angular Frontend | ✅ Completed (refreshed UI with light / dark mode) |
+| Frontend–Backend Integration | ✅ Completed (all screens use the live API, mock data turned off) |
+| ESP32 IoT Device | 🚧 In Progress (device sends readings over USB; firmware not yet in this repository) |
+| IoT–Backend Integration | 🚧 In Progress (USB readings are saved to a configured plant every 30 seconds) |
 | Friendly Plant Voice Messages | 🚧 In Progress |
+| End-to-End Testing (device → API → app) | 🔜 Next step |
 
 ---
 
@@ -67,13 +69,15 @@ The project follows **Clean Architecture** and is built with **ASP.NET Core Web 
 - 💬 Automatic Plant Health Evaluation (e.g. *Needs Water*, *Too Hot*, *Needs Light*)
 - 🔔 Notifications with unread count, mark as read and mark all as read
 - 🛡️ Consistent error handling (400 / 401 / 404 / 409) and per-user data protection
+- 🔍 Typo-tolerant plant search in English and Arabic (e.g. *mnit* finds *Mint*)
+- 💡 Light shown as a percentage (`lightLevel`) next to the raw sensor value
+- 🌗 Light and dark mode, profile and settings pages
 - 📖 OpenAPI / Swagger Documentation with JWT support
-- 🔌 Device API for the ESP32 sensor device to send readings
+- 🔌 Device input: HTTP device API, plus a USB serial reader that saves ESP32 readings automatically
 
 **In progress / Planned**
 
-- 📡 ESP32 IoT device sending live plant readings to the backend
-
+- 📡 ESP32 IoT device sending live plant readings end to end
 - 🗣️ Friendly first-person plant voice messages
 - 📈 Plant Status History view
 - 👤 Admin Management
@@ -137,7 +141,7 @@ Each project contains its own dedicated README with setup instructions.
 | **Backend** | ASP.NET Core Web API (.NET 10), C#, Entity Framework Core, SQL Server |
 | **Frontend** | Angular 20, TypeScript, HTML5, CSS3, RxJS |
 | **Architecture** | Clean Architecture |
-| **Security** | JWT Bearer, BCrypt password hashing |
+| **Security** | JWT Bearer, PBKDF2 password hashing (ASP.NET Core Identity `PasswordHasher`) |
 | **IoT** | ESP32 microcontroller with plant sensors |
 | **Documentation** | OpenAPI / Swagger |
 | **Tools** | Git, GitHub |
@@ -161,7 +165,7 @@ Each project contains its own dedicated README with setup instructions.
 
 Plant readings can come from:
 
-- 🔌 **ESP32 IoT Device**: sensors placed with the plant send readings to the backend automatically
+- 🔌 **ESP32 IoT Device**: sensors placed with the plant send readings to the backend automatically (over USB serial, or through the HTTP device API)
 - ✍️ **Manual Input**: readings entered through the app, so SPROUTY can also be used without hardware
 - 📊 **Dataset Import** (planned)
 
@@ -226,13 +230,25 @@ http://localhost:4200
 
 Start the backend first. In development, the Angular dev server proxies `/api` to `https://localhost:7092`, so no CORS setup is needed.
 
-Feature flags in `SproutyFrontend/src/app/core/config.ts` switch each area between mock data and the live API. See the [frontend README](SproutyFrontend/README.md) for details.
+All feature flags in `SproutyFrontend/src/app/core/config.ts` are off, so every screen uses the live API. See the [frontend README](SproutyFrontend/README.md) for details.
 
 ---
 
 ## IoT Device
 
-SPROUTY includes an **ESP32-based IoT device** with sensors placed next to the plant. The hardware components are ready and the firmware is under development. Once connected, the device will send plant readings to the backend automatically, and the results will appear in the app as plant status and notifications.
+SPROUTY includes an **ESP32-based IoT device** with sensors placed next to the plant. The device sends its readings as JSON lines over USB. Inside the API, two background services handle them:
+
+1. `SerialSensorReaderService` reads the USB port and keeps the latest reading.
+2. `SerialReadingPersistenceService` saves that reading to one plant every 30 seconds, so the plant status and notifications update automatically.
+
+To use it, set these values in `SproutyBackend/src/Sprouty.Api/appsettings.json` (or in User Secrets):
+
+```json
+"SerialPort":      { "PortName": "COM3", "BaudRate": 115200 },
+"SerialIngestion": { "Enabled": true, "PlantId": "<plant id>", "UserId": "<owner user id>", "IntervalSeconds": 30 }
+```
+
+While `PlantId` and `UserId` are empty, the readings are not saved.
 
 ---
 # 📁 Project Files
@@ -263,35 +279,20 @@ The ESP32 device firmware will be added to this repository once it is completed.
 
 # 👥 Team Members
 
-Developed as a **DEPI Full Stack .NET Web Developer Capstone Project** at **YAT Learning Centers**.
+Developed as a **DEPI Full Stack .NET Web Developer Capstone Project** at **YAT Learning**.
 
-| # | Name | Role |
-|---|------|------|
-| 1 | Sohila Ismail Mohamed | Product Lead & Backend Developer |
-| 2 | Ahmed Farag | Backend Developer |
-| 3 | Safia Emad Mohamed | Frontend Developer |
-| 4 | Reem Ahmed | Frontend Developer |
-| 5 | Abdelrahman Ashraf | Embedded Systems / IoT Developer |
-| 6 | Mohamed Ahmed | Embedded Systems / IoT Developer |
-
----
-
-# 🧩 Roles & Responsibilities
-
-| Member | Responsibilities |
-|---|---|
-| **Sohila** — Product Lead & Backend | Product definition, personas, user journey, MVP scope and system design; plant management (CRUD), sensor reading and notification endpoints; project documentation |
-| **Ahmed** — Backend | Clean Architecture setup, domain model and database migrations; JWT authentication and global exception handling; plant types API; sensor reading processing and plant status evaluation; notifications; forgot / reset password |
-| **Safia** — Frontend | Angular application setup; connecting authentication and plant types to the backend API; add-plant page; repository owner |
-| **Reem** — Frontend | Angular user interface and pages |
-| **Abdelrahman** — IoT | ESP32 hardware and sensors; device firmware |
-| **Mohamed** — IoT | ESP32 hardware and sensors; device firmware |
+- Sohila Ismail Mohamed
+- Ahmed Farag
+- Safia Emad Mohamed
+- Reem Ahmed
+- Abdelrahman Ashraf
+- Mohamed Ahmed
 
 ---
 
 # 🎓 Instructor
 
-**Ayed Ali Ayed** — YAT Learning Centers, Digital Egypt Pioneers Initiative (DEPI)
+**Ayed Ali Ayed** — YAT Learning, Digital Egypt Pioneers Initiative (DEPI)
 
 ---
 
@@ -306,11 +307,13 @@ Developed as a **DEPI Full Stack .NET Web Developer Capstone Project** at **YAT 
 | 5 | Core Backend Features | Plant types API, sensor reading processing and plant health evaluation | 24 – 30 Oct 2026 | ✅ Done |
 | 6 | Plants, Readings & Notifications | Plant CRUD, reading history, notifications, validation and testing | 15 – 16 Nov 2026 | ✅ Done |
 | 7 | Account Recovery | Forgot / reset password by email | 18 Nov 2026 | ✅ Done |
-| 8 | IoT Device | ESP32 hardware assembly and firmware | Nov 2026 | 🚧 In Progress |
-| 9 | Integration | Connecting frontend, backend and the IoT device end to end | Upcoming | 🔜 Next |
-| 10 | Testing & Improvement | Unit tests, internal testing and bug fixing | Upcoming | 🔜 Planned |
-| 11 | User Testing | Trial with 5–10 real users from the target group (ages 18–25) | Upcoming | 🔜 Planned |
-| 12 | Final Delivery | Documentation, presentation and demo | Upcoming | 🔜 Planned |
+| 8 | Frontend Integration & UI | Live API on every screen, reset-password page, refreshed UI with light / dark mode, profile and settings | 15 – 25 Nov 2026 | ✅ Done |
+| 9 | Integration Fixes & Search | Enum names, UTC dates, CORS, required readings, light percentage, typo-tolerant search, safer password reset | 24 Nov 2026 | ✅ Done |
+| 10 | IoT Device | ESP32 hardware and firmware; USB serial reader and automatic saving of readings | Nov 2026 | 🚧 In Progress |
+| 11 | End-to-End Integration | Device → API → app working together on one machine | Upcoming | 🔜 Next |
+| 12 | Testing & Improvement | Unit tests, internal testing and bug fixing | Upcoming | 🔜 Planned |
+| 13 | User Testing | Trial with 5–10 real users from the target group (ages 18–25) | Upcoming | 🔜 Planned |
+| 14 | Final Delivery | Documentation, presentation and demo | Dec 2026 | 🔜 Planned |
 
 ---
 

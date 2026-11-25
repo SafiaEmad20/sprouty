@@ -26,7 +26,7 @@ Built with **ASP.NET Core Web API (.NET 10)**, **Entity Framework Core**, and **
 | Framework | ASP.NET Core Web API (.NET 10) |
 | ORM | Entity Framework Core 10 |
 | Database | SQL Server (LocalDB for development) |
-| Authentication | JWT Bearer, BCrypt password hashing |
+| Authentication | JWT Bearer, PBKDF2 password hashing (ASP.NET Core Identity `PasswordHasher`) |
 | Email | MailKit (SMTP) |
 | API Documentation | OpenAPI + Swagger UI |
 | Architecture | Clean Architecture |
