@@ -384,3 +384,306 @@ label{display:block;font-size:12px;font-weight:700;margin:16px 0 7px;color:var(-
     }
   }
 }
+
+/* =========================================
+   SPROUTY - FINAL DARK THEME PALETTE
+   ========================================= */
+
+:root.dark-theme {
+  /* Main backgrounds */
+  --bg: #092D23;
+  --surface: #103A2D;
+  --surface-soft: #174535;
+  --surface-sage: #205541;
+
+  /* Brand colors */
+  --forest: #A8C99F;
+  --forest-deep: #0B382B;
+  --forest-hover: #C1DAB7;
+  --sage: #A5BE9B;
+
+  /* Text */
+  --ink: #EDF5EC;
+  --muted: #B5C9B8;
+
+  /* Borders */
+  --line: #285441;
+  --line-strong: #3B6851;
+
+  /* Status colors */
+  --success-bg: #194B35;
+  --success: #B9D9B5;
+
+  --warning-bg: #51452E;
+  --warning: #EBD19A;
+
+  --danger: #F0A999;
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, .20);
+}
+
+/* Sidebar */
+.dark-theme .sidebar {
+  background: #0B382B;
+  color: #EDF5EC;
+  border-right: 1px solid rgba(180, 210, 185, .08);
+}
+
+.dark-theme .sidebar .brand {
+  color: #F0F6ED;
+}
+
+.dark-theme .sidebar .brand-mark {
+  color: #A8C99F;
+}
+
+.dark-theme .side-label {
+  color: #A5BEAB;
+}
+
+.dark-theme .side-nav a {
+  color: #C6D8C9;
+}
+
+.dark-theme .side-nav a:hover,
+.dark-theme .side-nav a.active {
+  background: rgba(168, 201, 159, .16);
+  color: #FFFFFF;
+}
+
+.dark-theme .sidebar .profile-row {
+  border-color: rgba(210, 230, 210, .15);
+}
+
+.dark-theme .sidebar .profile-avatar {
+  background: #A8C99F;
+  color: #103A2D;
+}
+
+.dark-theme .sidebar .profile-copy b {
+  color: #F0F6ED;
+}
+
+.dark-theme .sidebar .profile-copy small {
+  color: #B5C9B8;
+}
+
+.dark-theme .sidebar .tip-card {
+  background: rgba(168, 201, 159, .09);
+  border-color: rgba(168, 201, 159, .16);
+}
+
+/* Main workspace */
+.dark-theme .topbar {
+  background: #103A2D;
+  border-color: #285441;
+}
+
+.dark-theme .card {
+  background: #103A2D;
+  border-color: #285441;
+}
+
+/* Buttons */
+.dark-theme .btn-primary,
+.dark-theme .btn {
+  background: #A8C99F;
+  border-color: #A8C99F;
+  color: #103A2D;
+}
+
+.dark-theme .btn-primary:hover,
+.dark-theme .btn:hover {
+  background: #C1DAB7;
+  border-color: #C1DAB7;
+  color: #103A2D;
+}
+
+.dark-theme .btn-outline {
+  color: #EDF5EC;
+  border-color: #54735D;
+}
+
+/* =========================================
+   PROFILE - LIGHT MODE READABILITY
+   ========================================= */
+
+.profile-card {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.profile-main h2 {
+  color: var(--ink);
+}
+
+.profile-main p {
+  color: var(--muted);
+}
+
+.profile-details > div {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+.profile-details span {
+  color: #657568;
+  font-weight: 600;
+}
+
+.profile-details b {
+  color: #263329;
+  font-weight: 700;
+}
+
+.account-note {
+  color: #526456;
+  background: #F0F2E9;
+}
+
+.profile-large-avatar {
+  background: #E6EBDF;
+  color: #294735;
+}
+
+/* Profile readability in dark mode */
+.dark-theme .profile-card {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.dark-theme .profile-main h2,
+.dark-theme .profile-details b {
+  color: #EDF5EC;
+}
+
+.dark-theme .profile-main p,
+.dark-theme .profile-details span {
+  color: #B5C9B8;
+}
+
+.dark-theme .profile-details > div {
+  background: #174535;
+  border-color: #285441;
+}
+
+.dark-theme .profile-large-avatar {
+  background: #A8C99F;
+  color: #103A2D;
+}
+
+.dark-theme .account-note {
+  background: #174535;
+  color: #C6D8C9;
+}
+
+/* Smooth theme transition */
+body,
+.sidebar,
+.topbar,
+.card,
+.profile-details > div,
+.account-note {
+  transition:
+    background-color .25s ease,
+    color .25s ease,
+    border-color .25s ease;
+}
+
+/* =========================================
+   PROFILE LAYOUT FIX
+   Keep the name below the cover image
+   ========================================= */
+
+.profile-main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+
+  /* Remove the negative margin affecting the name */
+  margin-top: 0;
+
+  /* Keep the avatar overlapping the cover only */
+  padding: 20px 28px 0;
+}
+
+.profile-large-avatar {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+
+  /* Move the avatar upward without moving the name */
+  margin-top: -55px;
+}
+
+.profile-main h2 {
+  margin: 0 0 5px;
+  color: #263329 !important;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.profile-main p {
+  margin: 0;
+  color: #788278 !important;
+  font-size: 13px;
+}
+
+/* Light mode profile details */
+:root:not(.dark-theme) .profile-card {
+  background: #FFFEFA;
+}
+
+:root:not(.dark-theme) .profile-details span {
+  color: #657568;
+}
+
+:root:not(.dark-theme) .profile-details b {
+  color: #263329;
+}
+
+:root:not(.dark-theme) .account-note {
+  color: #526456;
+  background: #F0F2E9;
+}
+
+/* Dark mode profile */
+:root.dark-theme .profile-main h2 {
+  color: #EDF5EC !important;
+}
+
+:root.dark-theme .profile-main p {
+  color: #B5C9B8 !important;
+}
+
+:root.dark-theme .profile-details span {
+  color: #B5C9B8;
+}
+
+:root.dark-theme .profile-details b {
+  color: #EDF5EC;
+}
+
+:root.dark-theme .profile-details > div {
+  background: #174535;
+  border-color: #285441;
+}
+
+:root.dark-theme .account-note {
+  color: #C6D8C9;
+  background: #174535;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .profile-main {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .profile-main h2 {
+    font-size: 20px;
+  }
+}
+
